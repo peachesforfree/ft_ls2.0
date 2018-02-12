@@ -6,14 +6,18 @@ FLAGS = -Wall -Werror -Wextra -g
 
 RM = rm -Rf
 
-SRC = *.c
+SRC =	main.c \
+		command_parse.c \
+		assemble_first_queue.c \
+		print_queue.c
 
-INC = *.o
+INC =	*.h \
+		libft/libft.a
 
 all: $(NAME)
 
 $(NAME):
-	$(CC) $(FLAGS) $(SRC) $(INC) -o $(NAME)
+	$(CC) $(FLAGS) $(SRC) $(INC)
 
 clean:
 	$(RM) $(NAME)
