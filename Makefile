@@ -2,7 +2,7 @@ NAME = ft_ls
 
 CC = gcc
 
-FLAGS = -Wall -Werror -Wextra -g
+FLAGS = -Wall -Werror -Wextra
 
 RM = rm -Rf
 
@@ -14,7 +14,7 @@ INC =	ft_ls.h \
 all: $(NAME)
 
 $(NAME):
-	$(CC) $(FLAGS) $(SRC) $(INC)
+	$(CC) $(FLAGS) -g $(SRC) $(INC)
 
 clean:
 	$(RM) $(NAME)

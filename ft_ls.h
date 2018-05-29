@@ -3,6 +3,7 @@
 
 # include <unistd.h>
 # include <sys/stat.h>
+# include <sys/types.h>     //do i evne need this <--- ?
 # include <stdlib.h>
 # include <dirent.h>
 # include <strings.h>
@@ -21,6 +22,15 @@
 -u -f -g -d 
 and or handle spacing for long list on window
 */
+
+typedef struct      s_cont
+{
+    char            *path;
+    struct stat     cont;
+
+    struct s_cont   *next;
+    struct s_cont   *last;
+}                   t_cont;
 
 typedef struct          s_opndir
 {
