@@ -126,16 +126,38 @@ t_cont        *insert_alpha(char *path, t_cont *head)
     return (head);
 }
 
+/*****************************************************************************************/
+/*
+
+    last took off on the function below. Need to figure out how to run lstat on the path
+    save it to a new malloced temp t_cont and compare time from stat->st_mtimensec and make
+    a time comparison from there as it traverses the linked list of t_cont
+*/
+
+t_cont      *insert_time(char *path, t_cont *head)
+{
+    t_cont  *temp;
+    t_cont  *current;
+
+    current = head;
+    while (head != NULL)
+    {
+        temp = new_cont(path, NULL, NULL)
+        head = head->next;
+    }
+    return (head);
+}
+
 /*
 **this assembles the directory list chain
 */
 
 t_cont        *add_cont(char *path, t_cont *head, int flags)
 {
-    (void)flags;
-//    if (flags & TIMFLG)
-//        return(insert_time(path, head));
-//    else
+//    (void)flags;
+    if (flags & TIMFLG)
+        return(insert_time(path, head));
+    else
         return(insert_alpha(path, head));
 }
 
