@@ -176,7 +176,7 @@ void        enqueue_dir(t_opndir *head, t_opndir *new)
 }
 
 
-void            build_first_directory_chain(t_opndir *head)
+void            build_first_directory_chain(t_opndir *head, int flags)
 {
     t_cont      *temp;
     t_opndir    *current;
@@ -184,7 +184,7 @@ void            build_first_directory_chain(t_opndir *head)
 
     current = head;
     temp = current->dir_cont;
-    while (current)
+    while (head != NULL)
     {
         while(temp != NULL)
         {
@@ -195,11 +195,10 @@ void            build_first_directory_chain(t_opndir *head)
                     enqueue_dir(current, dir_temp);
                 //else
                 //    stack_opndir(current, dir_temp);
+               populate_dir(dir_temp, flags);
             }
             temp = temp->next;
         }
-        if (head->next == NULL)
-            break;
         head = head->next;
     }
 }
@@ -251,7 +250,7 @@ t_opndir    *start_queue(int flags, char **argv)
     }
     run_stat_contents(result->dir_cont);
     //if there are directories in the list
-    build_first_directory_chain(result);
+    build_first_directory_chain(result, flags);
     return (result);
 }
 
@@ -262,7 +261,7 @@ t_opndir    *print_full_list(t_opndir *head, int flags)
     (void)flags;
     
     dir = head;
-    while (dir)
+    while (dir != NULL)
     {
         printf("Directory: %s\n", dir->path);
         current = dir->dir_cont;    
@@ -281,18 +280,29 @@ t_opndir    *print_full_list(t_opndir *head, int flags)
     return(head->next);
 }
 
-void    populate_dir(t_opndir *current, flags)
+void    populate_dir(t_opndir *current, int flags)
 {
-    t_cont  *temp;
 
     if (current == NULL)
         return;
     current->dir = opendir(current->path);
     struct dirent *readdir(DIR *dirp);
-    while ()
+    while ((current->dirent = readdir(current->dir)) != NULL)
+        current->dir_cont = add_cont(current->dirent->d_name, current->dir_cont, flags);
+    closedir(current->dir);
+}
+
+void    print_dir_cont(t_opndir *current, int flags)
+{
+    t_cont  *temp;
+    (void)flags;
+
+    temp = current->dir_cont;
+    printf("Directory: %s\n", current->path);
+    while(temp != NULL)
     {
-//  last took off from her ... need to figure out how to read the contents of a directory
-//and place those contents in the t_opndir -> dir_cont linked list
+        printf("\tFile: %s\n", temp->path);
+        temp = temp->next;
     }
 }
 
@@ -302,13 +312,14 @@ int     main(int argc, char **argv)
     t_opndir    *head;
 
     flags = check_flags(FLAGCHAR, argc, argv);
-    //print_flags(flags); //for testing
+    //print_flags(flags); /**************************  for testing           */
     head = start_queue(flags, argv);
     while (head != NULL)
     {
-        print_full_list(head, flags);
+        //print_full_list(head, flags);
+        print_dir_cont(head, flags);
         head = head->next;
-        populate_dir(head, flags);
+        //populate_dir(head, flags);
     }
     return(0);
 }

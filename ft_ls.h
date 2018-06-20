@@ -57,6 +57,7 @@ typedef struct          s_env
     char                **dir;
 }                       t_env;
 
+void    populate_dir(t_opndir *current, int flags);
 
 
 #endif
