@@ -17,6 +17,7 @@
 # define HIDFLG     0b00000100
 # define REVFLG     0b00001000
 # define TIMFLG     0b00010000
+# define NOOPTION   1
 
 /* bonus
 -u -f -g -d 

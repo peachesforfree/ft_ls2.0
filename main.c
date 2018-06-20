@@ -1,5 +1,11 @@
 #include "ft_ls.h"
 
+void    error_no_option(char c)
+{
+    printf("ls: illegal option -- %c\nusage: ls [%s] [file ...]", c, FLAGCHAR);
+    exit(0);
+}
+
 int     check_flags(char *flags, int argc, char **argv)
 {
     (void)argc;
@@ -14,20 +20,23 @@ int     check_flags(char *flags, int argc, char **argv)
         x = 0;
         if (argv[y][0] == '-')
         {
-            while (argv[y][x] != '\0' && ft_strchr(flags, argv[y][x]))
+            x++;
+            while (argv[y][x] != '\0' && ft_strchr(FLAGCHAR, argv[y][x]))
             {
                 if (argv[y][x] == 'l')
                     result |= LONGFLG;
-                if (argv[y][x] == 'R')
+                else if (argv[y][x] == 'R')
                     result |= RECFLG;
-                if (argv[y][x] == 'a')
+                else if (argv[y][x] == 'a')
                     result |= HIDFLG;
-                if (argv[y][x] == 'r')
+                else if (argv[y][x] == 'r')
                     result |= REVFLG;
-                if (argv[y][x] == 't')
+                else if (argv[y][x] == 't')
                     result |= TIMFLG;
                 x++;
             }
+            if (argv[y][x] != '\0' && (argv[y][0] == '-') && !ft_strchr(FLAGCHAR, argv[y][x]))
+                error_no_option(argv[y][x]);
         }
         else if (!ft_strchr(flags, argv[y][x]))
             return (result);
@@ -91,22 +100,28 @@ t_cont        *insert_alpha(char *path, t_cont *head)
     current = head;
     while (current)
     {
-        //if comparison makes eval cont to next link
-        
-        //if need to place in front of list
-        if (current->last == NULL)
-            return (new_cont(path, NULL, current));
-        //if need to place in between links
+        if (ft_strcmp(current->path, path) >= 0)
+        {
+            if (current->last == NULL)
+            {
+                head = new_cont(path, NULL, current);
+                break;
+            }
+            else
+            {
+                new_cont(path, current->last, current);
+                break;
+            }
+        }
         else if (ft_strcmp(current->path, path) < 0)
         {
-            new_cont(path, current, current->next);
-            break;
+            if (current->next == NULL)
+            {
+                new_cont(path, current, NULL);
+                break;
+            }
         }
-        else if (ft_strcmp(current->path, path) > 0)
-        {
-            current = current->next;
-            continue;
-        }
+        current = current->next;
     }
     return (head);
 }
@@ -118,7 +133,7 @@ t_cont        *insert_alpha(char *path, t_cont *head)
 t_cont        *add_cont(char *path, t_cont *head, int flags)
 {
     (void)flags;
-//    if (flags & TIMFLG)       NEED TO MAKE
+//    if (flags & TIMFLG)
 //        return(insert_time(path, head));
 //    else
         return(insert_alpha(path, head));
@@ -149,6 +164,9 @@ t_opndir    *start_queue(int flags, char **argv)
     {
         while (argv[y] != NULL)
         {
+            //run lstat on everything here path given from argv[y]
+            //if its a directory, place on the opndir queue
+            //if its a file, inject the name into the add_cont algorithm
             result->dir_cont = add_cont(argv[y], result->dir_cont, flags);
             y++;
         }
@@ -179,6 +197,9 @@ int     main(int argc, char **argv)
     //print_flags(flags); //for testing
     head = start_queue(flags, argv);
     while (head)
+    {   
         head = print_dir_cont(head, flags);
+        //write recursive call here
+    }
     return(0);
 }
