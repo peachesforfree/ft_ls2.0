@@ -139,6 +139,84 @@ t_cont        *add_cont(char *path, t_cont *head, int flags)
         return(insert_alpha(path, head));
 }
 
+t_opndir        *new_dir(char *path)
+{
+    t_opndir    *temp;
+
+    temp = ft_memalloc(sizeof(t_opndir));
+    temp->path = ft_strdup(path);
+    return (temp);
+}
+
+void        stack_opndir(t_opndir  *current, t_opndir *new)
+{
+    t_opndir    *temp;
+
+    temp = NULL;
+    if(current->next != NULL)
+        temp = current->next;
+    current->next = new;
+    new->last = current;
+    if (temp != NULL)
+    {
+        temp->last = new;
+        new->next = temp;
+    } 
+}
+
+void        enqueue_dir(t_opndir *head, t_opndir *new)
+{
+    t_opndir    *temp;
+
+    temp = head;
+    while (temp->next != NULL)
+        temp = temp->next;
+    temp->next = new;
+    new->last = temp;
+}
+
+
+void            build_first_directory_chain(t_opndir *head)
+{
+    t_cont      *temp;
+    t_opndir    *current;
+    t_opndir    *dir_temp;
+
+    current = head;
+    temp = current->dir_cont;
+    while (current)
+    {
+        while(temp != NULL)
+        {
+            if (S_ISDIR(temp->buffer.st_mode))
+            {
+                dir_temp = new_dir(temp->path);
+                //if (current->last && current->last->path == NULL)
+                    enqueue_dir(current, dir_temp);
+                //else
+                //    stack_opndir(current, dir_temp);
+            }
+            temp = temp->next;
+        }
+        if (head->next == NULL)
+            break;
+        head = head->next;
+    }
+}
+
+
+void            run_stat_contents(t_cont *head)
+{
+    t_cont  *current;
+
+    current = head;
+    while (current)
+    {
+        lstat(current->path, &current->buffer);// == -1)
+        current = current->next;
+    }
+}
+
 /*
 **To assemble first queue. Either assembles the list of stated items
 ** OR makes current directory the only item in head list
@@ -171,21 +249,51 @@ t_opndir    *start_queue(int flags, char **argv)
             y++;
         }
     }
+    run_stat_contents(result->dir_cont);
+    //if there are directories in the list
+    build_first_directory_chain(result);
     return (result);
 }
 
-t_opndir    *print_dir_cont(t_opndir *head, int flags)
+t_opndir    *print_full_list(t_opndir *head, int flags)
 {
     t_cont  *current;
+    t_opndir    *dir;
     (void)flags;
     
-    current = head->dir_cont;
-    while (current != NULL)
+    dir = head;
+    while (dir)
     {
-        printf("\t%s\n", current->path);
-        current = current->next;
+        printf("Directory: %s\n", dir->path);
+        current = dir->dir_cont;    
+        while (current != NULL)
+        {
+            if (S_ISDIR(current->buffer.st_mode) && dir->path == NULL)
+                (void)flags;
+            else
+                printf("\tfile: %s\n", current->path);
+            current = current->next;
+        }
+        if (dir->next == NULL)
+            break;
+        dir = dir->next;
     }
     return(head->next);
+}
+
+void    populate_dir(t_opndir *current, flags)
+{
+    t_cont  *temp;
+
+    if (current == NULL)
+        return;
+    current->dir = opendir(current->path);
+    struct dirent *readdir(DIR *dirp);
+    while ()
+    {
+//  last took off from her ... need to figure out how to read the contents of a directory
+//and place those contents in the t_opndir -> dir_cont linked list
+    }
 }
 
 int     main(int argc, char **argv)
@@ -196,10 +304,11 @@ int     main(int argc, char **argv)
     flags = check_flags(FLAGCHAR, argc, argv);
     //print_flags(flags); //for testing
     head = start_queue(flags, argv);
-    while (head)
-    {   
-        head = print_dir_cont(head, flags);
-        //write recursive call here
+    while (head != NULL)
+    {
+        print_full_list(head, flags);
+        head = head->next;
+        populate_dir(head, flags);
     }
     return(0);
 }

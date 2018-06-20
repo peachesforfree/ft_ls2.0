@@ -27,7 +27,7 @@ and or handle spacing for long list on window
 typedef struct      s_cont
 {
     char            *path;
-    struct stat     cont;
+    struct stat     buffer;
 
     struct s_cont   *next;
     struct s_cont   *last;
