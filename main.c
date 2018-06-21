@@ -126,24 +126,45 @@ t_cont        *insert_alpha(char *path, t_cont *head)
     return (head);
 }
 
-/*****************************************************************************************/
-/*
-
-    last took off on the function below. Need to figure out how to run lstat on the path
-    save it to a new malloced temp t_cont and compare time from stat->st_mtimensec and make
-    a time comparison from there as it traverses the linked list of t_cont
-*/
-
 t_cont      *insert_time(char *path, t_cont *head)
 {
     t_cont  *temp;
     t_cont  *current;
 
     current = head;
-    while (head != NULL)
+    temp = new_cont(path, NULL, NULL);
+    lstat(temp->path, &temp->buffer);
+    if (current == NULL)
+        return(temp);   //maybe move this to bottom of function?
+    while (current != NULL)
     {
-        temp = new_cont(path, NULL, NULL)
-        head = head->next;
+        if (current->buffer.st_mtimespec.tv_sec < temp->buffer.st_mtimespec.tv_sec
+        || ((current->buffer.st_mtimespec.tv_sec == temp->buffer.st_mtimespec.tv_sec)
+        && (current->buffer.st_mtimespec.tv_nsec < temp->buffer.st_mtimespec.tv_nsec)))
+    //    && current->buffer.st_mtimespec.tv_nsec < temp->buffer.st_mtimespec.tv_nsec)  //compares last modification down to the nanosecond
+        {
+            if (current->last == NULL)
+            {
+                temp->next = current;
+                current->last = temp;
+                return (temp);
+            }
+            else if (current->last != NULL)
+            {
+                temp->last = current->last;
+                temp->next = current;
+                temp->last->next = temp;
+                temp->next->last = temp;
+                return (head);
+            }
+        }
+        if (current->next == NULL)
+        {
+            temp->last = current;
+            current->next = temp;
+            return(head);
+        }
+        current = current->next;
     }
     return (head);
 }
@@ -154,7 +175,6 @@ t_cont      *insert_time(char *path, t_cont *head)
 
 t_cont        *add_cont(char *path, t_cont *head, int flags)
 {
-//    (void)flags;
     if (flags & TIMFLG)
         return(insert_time(path, head));
     else
@@ -225,6 +245,50 @@ void            build_first_directory_chain(t_opndir *head, int flags)
     }
 }
 
+char            *new_path(char *prev, char *curr)
+{
+    char *temp;
+
+    temp = ft_strjoin(prev, "/");
+    temp = ft_strnjoin(temp, curr, 1);
+    return (temp);
+}
+
+
+/*****************************
+ * 
+ *  some issue here with actually going through opndir->dir_cont list 
+ *  need to find out how to figure out if item in list is a directory 
+ *  and how to pop it onto the opndir stack
+ * 
+ * ********************************/
+
+void            build_directory_chain(t_opndir *head, int flags)
+{
+    t_cont      *temp;
+    t_opndir    *current;
+    t_opndir    *dir_temp;
+
+    current = head;
+    while (head != NULL)
+    {
+        temp = current->dir_cont;
+        while(temp != NULL)
+        {
+            if (S_ISDIR(temp->buffer.st_mode))
+            {
+                if (head->path == NULL)
+                    dir_temp = new_dir(temp->path);
+                else
+                    dir_temp = new_dir(new_path(head->path, temp->path));
+                stack_opndir(current, dir_temp);
+                populate_dir(dir_temp, flags);
+            }
+            temp = temp->next;
+        }
+        head = head->next;
+    }
+}
 
 void            run_stat_contents(t_cont *head)
 {
@@ -340,8 +404,9 @@ int     main(int argc, char **argv)
     {
         //print_full_list(head, flags);
         print_dir_cont(head, flags);
+        if (flags & RECFLG)
+            build_directory_chain(head, flags);
         head = head->next;
-        //populate_dir(head, flags);
     }
     return(0);
 }
