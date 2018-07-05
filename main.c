@@ -384,6 +384,11 @@ void    print_dir_cont(t_opndir *current, int flags)
     (void)flags;
 
     temp = current->dir_cont;
+    if (flags & REVFLG)
+    {
+        while (temp->next != NULL)
+            temp = temp->next;
+    }
     //printf("Directory: %s\n", current->path);
     while(temp != NULL)
     {
@@ -391,7 +396,10 @@ void    print_dir_cont(t_opndir *current, int flags)
             printf("\tFile: %s\n", temp->path);
         else if (temp->path && temp->path[0] != '.')
             printf("\tFile: %s\n", temp->path);
-        temp = temp->next;
+        if (flags & REVFLG)
+            temp = temp->last;
+        else
+            temp = temp->next;
     }
 }
 
