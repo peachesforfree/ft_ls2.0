@@ -270,17 +270,17 @@ void            build_directory_chain(t_opndir *head, int flags)
     t_opndir    *dir_temp;
 
     current = head;
-    while (head != NULL)
+    while (current != NULL)
     {
         temp = current->dir_cont;
         while(temp != NULL)
         {
             if (S_ISDIR(temp->buffer.st_mode))
             {
-                if (head->path == NULL)
+                if (current->path == NULL)
                     dir_temp = new_dir(temp->path);
                 else
-                    dir_temp = new_dir(new_path(head->path, temp->path));
+                    dir_temp = new_dir(new_path(current->path, temp->path));
                 stack_opndir(current, dir_temp);
                 populate_dir(dir_temp, flags);
             }
@@ -384,10 +384,13 @@ void    print_dir_cont(t_opndir *current, int flags)
     (void)flags;
 
     temp = current->dir_cont;
-    printf("Directory: %s\n", current->path);
+    //printf("Directory: %s\n", current->path);
     while(temp != NULL)
     {
-        printf("\tFile: %s\n", temp->path);
+        if (flags & HIDFLG)
+            printf("\tFile: %s\n", temp->path);
+        else if (temp->path && temp->path[0] != '.')
+            printf("\tFile: %s\n", temp->path);
         temp = temp->next;
     }
 }
