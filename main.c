@@ -1,3 +1,9 @@
+/*********************************************
+ * note: something is wrong with time sort.
+ *          fix after long printing is done.
+ * 
+ * **********************************************/
+
 #include "ft_ls.h"
 
 void    error_no_option(char c)
@@ -340,32 +346,6 @@ t_opndir    *start_queue(int flags, char **argv)
     return (result);
 }
 
-t_opndir    *print_full_list(t_opndir *head, int flags)
-{
-    t_cont  *current;
-    t_opndir    *dir;
-    (void)flags;
-    
-    dir = head;
-    while (dir != NULL)
-    {
-        printf("Directory: %s\n", dir->path);
-        current = dir->dir_cont;    
-        while (current != NULL)
-        {
-            if (S_ISDIR(current->buffer.st_mode) && dir->path == NULL)
-                (void)flags;
-            else
-                printf("\tfile: %s\n", current->path);
-            current = current->next;
-        }
-        if (dir->next == NULL)
-            break;
-        dir = dir->next;
-    }
-    return(head->next);
-}
-
 void    populate_dir(t_opndir *current, int flags)
 {
 
@@ -377,6 +357,51 @@ void    populate_dir(t_opndir *current, int flags)
         current->dir_cont = add_cont(current->dirent->d_name, current->dir_cont, flags);
     closedir(current->dir);
 }
+
+t_cont    *iterate_t_cont(t_cont *temp, int flags)
+{
+    if (flags & REVFLG)
+        return (temp->last);
+    else
+        return (temp->next);
+
+}
+
+void    long_format_print(t_cont *current)
+{
+    lstat(current->path, &current->buffer);
+    //printing file mode 
+    if (S_ISREG(current->buffer.st_mode))
+        ft_putchar('-');
+    else if (S_ISDIR(current->buffer.st_mode))
+        ft_putchar('d');
+    else if (S_ISLNK(current->buffer.st_mode))
+        ft_putchar('l');
+    //printing owner permissions
+    ft_putchar((S_IRUSR & current->buffer.st_mode) ? 'r' : '-'); 
+    ft_putchar((S_IWUSR & current->buffer.st_mode) ? 'w' :'-');
+    ft_putchar((S_IXUSR & current->buffer.st_mode) ? 'x' : '-');
+    //peinting group permissions
+    ft_putchar((S_IRGRP & current->buffer.st_mode) ? 'r' : '-'); 
+    ft_putchar((S_IWGRP & current->buffer.st_mode) ? 'w' :'-');
+    ft_putchar((S_IXGRP & current->buffer.st_mode) ? 'x' : '-');
+    //others permissions
+    ft_putchar((S_IROTH & current->buffer.st_mode) ? 'r' : '-'); 
+    ft_putchar((S_IWOTH & current->buffer.st_mode) ? 'w' :'-');
+    ft_putchar((S_IXOTH & current->buffer.st_mode) ? 'x' : '-');
+    //number of hard links
+    printf("%4d", current->buffer.st_nlink);
+    //user
+    printf(" %s ", getpwuid(current->buffer.st_uid)->pw_name);
+    //group
+    printf(" %s ", getgrgid(current->buffer.st_gid)->gr_name);
+    //size in bytes
+    printf("%8lld ", current->buffer.st_size);
+    //date
+    //printf("%s %d ", ctime(&current->buffer.st_mtim.tm_mon), current->buffer.st_mtim.tm_mday);
+    printf (" %s ", ctime(&current->buffer.st_mtimespec.tv_sec)->tm_month);
+    //printf("%5 ", hour, minute) OR printf("%5d ", year)
+    }
 
 void    print_dir_cont(t_opndir *current, int flags)
 {
@@ -392,14 +417,15 @@ void    print_dir_cont(t_opndir *current, int flags)
     //printf("Directory: %s\n", current->path);
     while(temp != NULL)
     {
-        if (flags & HIDFLG)
-            printf("\tFile: %s\n", temp->path);
-        else if (temp->path && temp->path[0] != '.')
-            printf("\tFile: %s\n", temp->path);
-        if (flags & REVFLG)
-            temp = temp->last;
-        else
-            temp = temp->next;
+        if (!(flags & HIDFLG) && temp->path && temp->path[0] == '.')
+        {
+            temp = iterate_t_cont(temp, flags);
+            continue;
+        }
+        if (flags & LONGFLG)
+            long_format_print(temp);    
+        printf("\tFile: %s\n", temp->path);
+        temp = iterate_t_cont(temp, flags);
     }
 }
 
@@ -413,7 +439,6 @@ int     main(int argc, char **argv)
     head = start_queue(flags, argv);
     while (head != NULL)
     {
-        //print_full_list(head, flags);
         print_dir_cont(head, flags);
         if (flags & RECFLG)
             build_directory_chain(head, flags);

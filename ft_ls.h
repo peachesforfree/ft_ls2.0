@@ -10,6 +10,9 @@
 # include <stdbool.h>
 # include <stdio.h>
 # include "libft/libft.h"
+# include <pwd.h>
+# include <grp.h>
+# include <time.h>
 
 # define FLAGCHAR "-lRart"
 # define LONGFLG    0b00000001
