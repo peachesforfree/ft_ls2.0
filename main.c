@@ -73,9 +73,7 @@ t_cont      *new_cont(char *path, t_cont *before, t_cont *after)
     if (path)
         temp->path = ft_strdup(path);
 
-        //maybe run lstat here ?
-        //maybe also check permnissions if needed ?
-
+    lstat(path, &temp->buffer);
 
     if (before != NULL)
     {
@@ -260,6 +258,12 @@ char            *new_path(char *prev, char *curr)
     return (temp);
 }
 
+t_cont      *go_to_end(t_cont *temp)
+{
+    while (temp->next != NULL)
+        temp = temp->next;
+    return (temp);
+}
 
 /*****************************
  * 
@@ -276,24 +280,21 @@ void            build_directory_chain(t_opndir *head, int flags)
     t_opndir    *dir_temp;
 
     current = head;
-    while (current != NULL)
-    {
-        temp = current->dir_cont;
+    //while (current != NULL)
+    //{
+        temp = go_to_end(current->dir_cont);
         while(temp != NULL)
         {
-            if (S_ISDIR(temp->buffer.st_mode))
+            if ((ft_strcmp(temp->path, ".") && ft_strcmp(temp->path, "..")) && S_ISDIR(temp->buffer.st_mode))
             {
-                if (current->path == NULL)
-                    dir_temp = new_dir(temp->path);
-                else
-                    dir_temp = new_dir(new_path(current->path, temp->path));
+                dir_temp = new_dir(new_path(current->path, temp->path));
                 stack_opndir(current, dir_temp);
                 populate_dir(dir_temp, flags);
             }
-            temp = temp->next;
+            temp = temp->last;
         }
-        head = head->next;
-    }
+    //    current = current->next;
+    //}
 }
 
 void            run_stat_contents(t_cont *head)
@@ -410,7 +411,6 @@ void    long_format_print(t_cont *current)
 void    print_dir_cont(t_opndir *current, int flags)
 {
     t_cont  *temp;
-    (void)flags;
 
     temp = current->dir_cont;
     if (flags & REVFLG)
@@ -418,7 +418,11 @@ void    print_dir_cont(t_opndir *current, int flags)
         while (temp->next != NULL)
             temp = temp->next;
     }
-    //printf("Directory: %s\n", current->path);
+    if (flags & RECFLG)
+    {
+        if (current->path != NULL)
+            ft_printf("%s:\n", current->path);
+    }
     while(temp != NULL)
     {
         if (!(flags & HIDFLG) && temp->path && temp->path[0] == '.')
@@ -428,8 +432,8 @@ void    print_dir_cont(t_opndir *current, int flags)
         }
         if (flags & LONGFLG)
             long_format_print(temp);
-   
         ft_printf("%s\n", temp->path);
+        //need to insert here a way to print where to symbolic link leads to THEN a new line
         temp = iterate_t_cont(temp, flags);
     }
 }
@@ -445,9 +449,9 @@ int     main(int argc, char **argv)
     while (head != NULL)
     {
         print_dir_cont(head, flags);
-        if (flags & RECFLG)
-            build_directory_chain(head, flags);
         head = head->next;
+        if (flags & RECFLG && head != NULL)
+            build_directory_chain(head, flags);
     }
     return(0);
 }
