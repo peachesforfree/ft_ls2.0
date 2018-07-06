@@ -13,6 +13,7 @@
 # include <pwd.h>
 # include <grp.h>
 # include <time.h>
+# include "ft_printf/ft_printf.h"
 
 # define FLAGCHAR "-lRart"
 # define LONGFLG    0b00000001

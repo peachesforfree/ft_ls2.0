@@ -9,7 +9,8 @@ RM = rm -Rf
 SRC =	main.c
 
 INC =	ft_ls.h \
-		libft/libft.a
+		libft/libft.a \
+		ft_printf/libftprintf.a
 
 all: $(NAME)
 

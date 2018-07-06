@@ -12,7 +12,7 @@ void    error_no_option(char c)
     exit(0);
 }
 
-int     check_flags(char *flags, int argc, char **argv)
+int     flag_checker(char *flags, int argc, char **argv)
 {
     (void)argc;
     int     result;
@@ -390,16 +390,20 @@ void    long_format_print(t_cont *current)
     ft_putchar((S_IWOTH & current->buffer.st_mode) ? 'w' :'-');
     ft_putchar((S_IXOTH & current->buffer.st_mode) ? 'x' : '-');
     //number of hard links
-    printf("%4d", current->buffer.st_nlink);
+    ft_printf("%3d", current->buffer.st_nlink);
     //user
-    printf(" %s ", getpwuid(current->buffer.st_uid)->pw_name);
+    ft_printf(" %s ", getpwuid(current->buffer.st_uid)->pw_name);
     //group
-    printf(" %s ", getgrgid(current->buffer.st_gid)->gr_name);
+    ft_printf(" %s", getgrgid(current->buffer.st_gid)->gr_name);
     //size in bytes
-    printf("%8lld ", current->buffer.st_size);
+    ft_printf("%8lld ", current->buffer.st_size);
     //date
     //printf("%s %d ", ctime(&current->buffer.st_mtim.tm_mon), current->buffer.st_mtim.tm_mday);
-    printf (" %s ", ctime(&current->buffer.st_mtimespec.tv_sec)->tm_month);
+    char    *time_str;
+
+    time_str = &ctime(&current->buffer.st_mtimespec.tv_sec)[4];
+    ft_bzero(&time_str[12], 1);
+    ft_printf ("%s ", time_str);
     //printf("%5 ", hour, minute) OR printf("%5d ", year)
     }
 
@@ -423,8 +427,9 @@ void    print_dir_cont(t_opndir *current, int flags)
             continue;
         }
         if (flags & LONGFLG)
-            long_format_print(temp);    
-        printf("\tFile: %s\n", temp->path);
+            long_format_print(temp);
+   
+        ft_printf("%s\n", temp->path);
         temp = iterate_t_cont(temp, flags);
     }
 }
@@ -434,7 +439,7 @@ int     main(int argc, char **argv)
     int         flags;
     t_opndir    *head;
 
-    flags = check_flags(FLAGCHAR, argc, argv);
+    flags = flag_checker(FLAGCHAR, argc, argv);
     //print_flags(flags); /**************************  for testing           */
     head = start_queue(flags, argv);
     while (head != NULL)
