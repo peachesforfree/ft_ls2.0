@@ -1,6 +1,5 @@
 /*********************************************
- * note: something is wrong with time sort.
- *          fix after long printing is done.
+ * note: LINE 255
  * 
  * **********************************************/
 
@@ -251,11 +250,19 @@ void            build_first_directory_chain(t_opndir *head, int flags)
 
 char            *new_path(char *prev, char *curr)
 {
+
+    //need to figure out how to make the two strings joing without multiple '/'
+    // issue is result of having "./" or "../" OR "." in prev and "." or ".." in curr in either prev or curr 
     char *temp;
 
-    temp = ft_strjoin(prev, "/");
-    temp = ft_strnjoin(temp, curr, 1);
+    temp = NULL;
+    if (prev == NULL)
+    {
+        if ()
+    }
+
     return (temp);
+    //if previous is '.' or '..' then only return the current directory.
 }
 
 t_cont      *go_to_end(t_cont *temp)
@@ -278,6 +285,7 @@ void            build_directory_chain(t_opndir *head, int flags)
     t_cont      *temp;
     t_opndir    *current;
     t_opndir    *dir_temp;
+    char        *new;
 
     current = head;
     //while (current != NULL)
@@ -285,9 +293,16 @@ void            build_directory_chain(t_opndir *head, int flags)
         temp = go_to_end(current->dir_cont);
         while(temp != NULL)
         {
-            if ((ft_strcmp(temp->path, ".") && ft_strcmp(temp->path, "..")) && S_ISDIR(temp->buffer.st_mode))
+            new = new_path(current->path, temp->path);
+            if (new == NULL)
             {
-                dir_temp = new_dir(new_path(current->path, temp->path));
+                temp = temp->last;
+                continue;
+            }
+            lstat(new, &temp->buffer);
+            if (S_ISDIR(temp->buffer.st_mode))
+            {
+                dir_temp = new_dir(new);
                 stack_opndir(current, dir_temp);
                 populate_dir(dir_temp, flags);
             }
@@ -349,13 +364,14 @@ t_opndir    *start_queue(int flags, char **argv)
 
 void    populate_dir(t_opndir *current, int flags)
 {
-
     if (current == NULL)
         return;
     current->dir = opendir(current->path);
     struct dirent *readdir(DIR *dirp);
     while ((current->dirent = readdir(current->dir)) != NULL)
+    {
         current->dir_cont = add_cont(current->dirent->d_name, current->dir_cont, flags);
+    }
     closedir(current->dir);
 }
 
@@ -449,9 +465,9 @@ int     main(int argc, char **argv)
     while (head != NULL)
     {
         print_dir_cont(head, flags);
-        head = head->next;
         if (flags & RECFLG && head != NULL)
             build_directory_chain(head, flags);
+        head = head->next;
     }
     return(0);
 }
