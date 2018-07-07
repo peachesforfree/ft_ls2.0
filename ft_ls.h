@@ -62,6 +62,6 @@ typedef struct          s_env
 }                       t_env;
 
 void    populate_dir(t_opndir *current, int flags);
-
+char    *new_path(char *prev, char *curr);
 
 #endif

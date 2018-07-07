@@ -71,9 +71,6 @@ t_cont      *new_cont(char *path, t_cont *before, t_cont *after)
     temp = (t_cont*)ft_memalloc(sizeof(t_cont));
     if (path)
         temp->path = ft_strdup(path);
-
-    lstat(path, &temp->buffer);
-
     if (before != NULL)
     {
         temp->last = before;
@@ -250,19 +247,43 @@ void            build_first_directory_chain(t_opndir *head, int flags)
 
 char            *new_path(char *prev, char *curr)
 {
-
+    bool    first;
+    bool    second;
+    char    *temp;
     //need to figure out how to make the two strings joing without multiple '/'
     // issue is result of having "./" or "../" OR "." in prev and "." or ".." in curr in either prev or curr 
-    char *temp;
-
-    temp = NULL;
-    if (prev == NULL)
+    first = true;
+    second = true;
+    /*if (prev != NULL)
     {
-        if ()
+        if (ft_strlen(prev) == 1 && prev[0] == '.')
+            first = false; 
+        else if (ft_strlen(prev) == 2 && prev[0] == '.' && prev[1] == '.' )
+            first = false;
+    }*/
+    if (curr != NULL)
+    {
+        if (ft_strlen(curr) == 1 && curr[0] == '.')
+            second = false; 
+        else if (ft_strlen(curr) == 2 && curr[0] == '.' && curr[1] == '.' )
+            second = false;
     }
-
-    return (temp);
-    //if previous is '.' or '..' then only return the current directory.
+    if (first == true && second == true)
+    {
+        if (prev[ft_strlen(prev) - 1] == '/')
+            return (ft_strjoin(prev, curr));
+        else
+            temp = ft_strjoin(prev, "/");
+        return (ft_strnjoin(temp, curr, 1));
+    }
+    if (first == false && second == true)
+        return (ft_strdup(curr));
+    
+    //  make this automatic return null statement
+    //if (first == false && second == false)
+    // if (first == true && second == false)
+   
+    return (NULL);
 }
 
 t_cont      *go_to_end(t_cont *temp)
@@ -288,17 +309,17 @@ void            build_directory_chain(t_opndir *head, int flags)
     char        *new;
 
     current = head;
-    //while (current != NULL)
-    //{
-        temp = go_to_end(current->dir_cont);
-        while(temp != NULL)
+    if (current->dir_cont == NULL)
+        return;
+    temp = go_to_end(current->dir_cont);
+    while(temp != NULL)
+    {
+        new = NULL;
+        new = temp->path;
+        //new = new_path(current->path, temp->path);
+        //ft_printf("\tbuild_directory_charn:%s\n", new);
+        if (new != NULL)
         {
-            new = new_path(current->path, temp->path);
-            if (new == NULL)
-            {
-                temp = temp->last;
-                continue;
-            }
             lstat(new, &temp->buffer);
             if (S_ISDIR(temp->buffer.st_mode))
             {
@@ -306,10 +327,12 @@ void            build_directory_chain(t_opndir *head, int flags)
                 stack_opndir(current, dir_temp);
                 populate_dir(dir_temp, flags);
             }
-            temp = temp->last;
         }
-    //    current = current->next;
-    //}
+        //if (new != NULL)
+        //    free(new);
+        temp = temp->last;
+    }
+    
 }
 
 void            run_stat_contents(t_cont *head)
@@ -364,13 +387,22 @@ t_opndir    *start_queue(int flags, char **argv)
 
 void    populate_dir(t_opndir *current, int flags)
 {
+    char    *new;
+
     if (current == NULL)
         return;
     current->dir = opendir(current->path);
     struct dirent *readdir(DIR *dirp);
     while ((current->dirent = readdir(current->dir)) != NULL)
     {
-        current->dir_cont = add_cont(current->dirent->d_name, current->dir_cont, flags);
+        if ((RECFLG & flags) && current->path != NULL)
+        {
+            new = new_path(current->path, current->dirent->d_name);
+            if (new != NULL)
+                current->dir_cont = add_cont(new, current->dir_cont, flags);
+        }       
+        else
+            current->dir_cont = add_cont(current->dirent->d_name, current->dir_cont, flags);
     }
     closedir(current->dir);
 }
@@ -441,11 +473,16 @@ void    print_dir_cont(t_opndir *current, int flags)
     }
     while(temp != NULL)
     {
+        /*
+
+            better method to not print hidden files. Lookfor dot from rear
+            check if letters follow and or if the dot is solo
+
         if (!(flags & HIDFLG) && temp->path && temp->path[0] == '.')
         {
             temp = iterate_t_cont(temp, flags);
             continue;
-        }
+        }*/
         if (flags & LONGFLG)
             long_format_print(temp);
         ft_printf("%s\n", temp->path);
@@ -465,7 +502,7 @@ int     main(int argc, char **argv)
     while (head != NULL)
     {
         print_dir_cont(head, flags);
-        if (flags & RECFLG && head != NULL)
+        if ((flags & RECFLG) && head != NULL)
             build_directory_chain(head, flags);
         head = head->next;
     }
