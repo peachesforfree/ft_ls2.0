@@ -1,9 +1,5 @@
 /*********************************************
- * 
- * Need to fix:
- *  when stating a file it segfaults
- *  need permission error for directories
- *  
+ * line 551
  * **********************************************/
 
 #include "ft_ls.h"
@@ -334,9 +330,9 @@ void        remove_directories(t_opndir *head)
     t_cont  *after;
 
     current = head->dir_cont;
-    while (current != NULL)
+    while (current != NULL && S_ISDIR(current->buffer.st_mode))
     {
-        if (!S_ISREG(current->buffer.st_mode))
+        if (S_ISDIR(current->buffer.st_mode))
         {
             before = current->last;
             after = current->next;
@@ -355,12 +351,24 @@ void        remove_directories(t_opndir *head)
     }   
 }
 
+int         does_exist(char *str)
+{
+    struct stat     buffer;
+    if (lstat(str, &buffer) < 0)
+    {
+        ft_printf("ft_ls: %s: No such file or directory\n", str);
+        return (0);
+    }
+    return(1);
+
+}
+
 /*
 **To assemble first queue. Either assembles the list of stated items
 ** OR makes current directory the only item in head list
 */
 
-t_opndir    *start_queue(int flags, char **argv)
+t_opndir    *start_queue(int flags, char **argv, int argc)
 {
     t_opndir    *result;
     int y;
@@ -372,15 +380,19 @@ t_opndir    *start_queue(int flags, char **argv)
     while (argv[y] != NULL && argv[y][0] == '-')
         y++;
     //if there are no specififed files/directories
-    if (y == 1 && argv[y] == NULL)
-      result->dir_cont = new_cont(".", NULL, NULL);
+    //if (y == 1 && argv[y] == NULL)
+    //  result->dir_cont = new_cont(".", NULL, NULL);
     //else if there are other arguemnts in list and its not at end
     //go into making the directory content chain and put user items in order
+    //else
+    if (argc == y)
+        result->dir_cont = new_cont(".", NULL, NULL);
     else
     {
         while (argv[y] != NULL)
         {
-            result->dir_cont = add_cont(argv[y], result->dir_cont, flags);
+            if (does_exist(argv[y]))
+                result->dir_cont = add_cont(argv[y], result->dir_cont, flags);
             y++;
         }
     }
@@ -512,26 +524,29 @@ void    print_dir_cont(t_opndir *current, int flags)
     while(temp != NULL)
     {
         name = temp->path;
-        /*
-
-            better method to not print hidden files. Lookfor dot from rear
-            check if letters follow and or if the dot is solo
-
-        if (!(flags & HIDFLG) && temp->path && temp->path[0] == '.')
-        {
-            temp = iterate_t_cont(temp, flags);
-            continue;
-        }*/
-        //if (name != NULL && hidden_name(name))
-        //    name = &name[ft_strlen(name)];
-        name = ft_strrchr(name, '/') + 1;
-        if (!(flags & HIDFLG) && (name[0] == '.'))
+        if ((name = ft_strrchr(name, '/')) != NULL)
+            name += 1;
+        else
+            name = temp->path;
+        if (!(flags & HIDFLG) && name && (name[0] == '.'))
             name = NULL;
         if (name != NULL && (flags & LONGFLG))
             long_format_print(temp);
         if (name)
-            ft_printf("%s\n", name);
-        //need to insert here a way to print where to symbolic link leads to THEN a new line
+            ft_putstr(name);
+        if (S_ISLNK(temp->buffer.st_mode) && (flags & LONGFLG))
+        {
+            char    *sylink;
+            int     count;
+
+            count = 0;
+            sylink = ft_strnew(1024);
+            readlink(temp->path, sylink, 1024);
+            ft_printf(" -> %s", sylink);
+        }
+        //write in function here for checking permissions and giving error if any
+        if (name)
+            ft_putchar('\n');
         temp = iterate_t_cont(temp, flags);
     }
 }
@@ -543,7 +558,7 @@ int     main(int argc, char **argv)
 
     flags = flag_checker(FLAGCHAR, argc, argv);
     //print_flags(flags); /**************************  for testing           */
-    head = start_queue(flags, argv);
+    head = start_queue(flags, argv, argc);
     while (head != NULL)
     {
         print_dir_cont(head, flags);
