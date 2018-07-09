@@ -1,15 +1,16 @@
 /*********************************************
  * 
- * display number of blocks per directory on recursive search
- * need to fix issue with not stating directory and assigning curent direcory "."
- * 
+ * Need to fix:
+ *  when stating a file it segfaults
+ *  need permission error for directories
+ *  
  * **********************************************/
 
 #include "ft_ls.h"
 
 void    error_no_option(char c)
 {
-    printf("ls: illegal option -- %c\nusage: ls [%s] [file ...]", c, FLAGCHAR);
+    printf("ls: illegal option -- %c\nusage: ls [%s] [file ...]\n", c, FLAGCHAR);
     exit(0);
 }
 
