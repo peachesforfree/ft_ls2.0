@@ -1,5 +1,6 @@
 /*********************************************
- * note: LINE 255
+ * 
+ * display number of blocks per directory on recursive search
  * 
  * **********************************************/
 
@@ -83,12 +84,6 @@ t_cont      *new_cont(char *path, t_cont *before, t_cont *after)
     }
     return (temp);
 }
-
-/***************************************************************
- * problem is right here, need to figure out how to properly sort 
- * and insert in ascii order
- * ***************************************************************/
-
 
 t_cont        *insert_alpha(char *path, t_cont *head)
 {
@@ -217,73 +212,18 @@ void        enqueue_dir(t_opndir *head, t_opndir *new)
     new->last = temp;
 }
 
-
-void            build_first_directory_chain(t_opndir *head, int flags)
-{
-    t_cont      *temp;
-    t_opndir    *current;
-    t_opndir    *dir_temp;
-
-    current = head;
-    temp = current->dir_cont;
-    while (head != NULL)
-    {
-        while(temp != NULL)
-        {
-            if (S_ISDIR(temp->buffer.st_mode))
-            {
-                dir_temp = new_dir(temp->path);
-                //if (current->last && current->last->path == NULL)
-                    enqueue_dir(current, dir_temp);
-                //else
-                //    stack_opndir(current, dir_temp);
-               populate_dir(dir_temp, flags);
-            }
-            temp = temp->next;
-        }
-        head = head->next;
-    }
-}
-
 char            *new_path(char *prev, char *curr)
 {
-    bool    first;
-    bool    second;
     char    *temp;
-    //need to figure out how to make the two strings joing without multiple '/'
-    // issue is result of having "./" or "../" OR "." in prev and "." or ".." in curr in either prev or curr 
-    first = true;
-    second = true;
-    /*if (prev != NULL)
-    {
-        if (ft_strlen(prev) == 1 && prev[0] == '.')
-            first = false; 
-        else if (ft_strlen(prev) == 2 && prev[0] == '.' && prev[1] == '.' )
-            first = false;
-    }*/
-    if (curr != NULL)
-    {
-        if (ft_strlen(curr) == 1 && curr[0] == '.')
-            second = false; 
-        else if (ft_strlen(curr) == 2 && curr[0] == '.' && curr[1] == '.' )
-            second = false;
-    }
-    if (first == true && second == true)
-    {
-        if (prev[ft_strlen(prev) - 1] == '/')
-            return (ft_strjoin(prev, curr));
-        else
-            temp = ft_strjoin(prev, "/");
-        return (ft_strnjoin(temp, curr, 1));
-    }
-    if (first == false && second == true)
-        return (ft_strdup(curr));
-    
-    //  make this automatic return null statement
-    //if (first == false && second == false)
-    // if (first == true && second == false)
-   
-    return (NULL);
+
+    temp = NULL;
+    if (prev[ft_strlen(prev) - 1] != '/')
+        temp = ft_strjoin(prev, "/");
+    else
+        temp = prev;
+
+    temp = ft_strjoin(temp, curr);
+    return (temp);
 }
 
 t_cont      *go_to_end(t_cont *temp)
@@ -291,6 +231,36 @@ t_cont      *go_to_end(t_cont *temp)
     while (temp->next != NULL)
         temp = temp->next;
     return (temp);
+}
+
+int             hidden_name(char *str)
+{
+    if (ft_strlen(str) == 1 && str[0] == '.')
+        return (1);
+    if (ft_strlen(str) == 2 && str[0] == '.' && str[1] == '.')
+        return (1);
+    return (0);
+}
+
+int             not_hidden_dir(t_opndir *head, t_cont *current)
+{
+    char    *file;
+
+    if (head->path == NULL)
+        return (1);         //working with first built directory chain
+    file = ft_strstr(current->path, head->path);
+    if (file != NULL)
+        file = &file[ft_strlen(head->path) + 1];
+    if (ft_strlen(file) == 1 && file[0] == '.')
+    {
+        //ft_printf("\t\t\thidden current dir\n");
+        return (0);
+    }
+    if (ft_strlen(file) == 2 && file[0] == '.' && file[1] == '.')
+    {
+        //ft_printf("\t\t\thidden previous dir\n");
+        return (0);
+    }return (1);
 }
 
 /*****************************
@@ -311,17 +281,17 @@ void            build_directory_chain(t_opndir *head, int flags)
     current = head;
     if (current->dir_cont == NULL)
         return;
-    temp = go_to_end(current->dir_cont);
+    temp = head->dir_cont;
+    if (!(flags & REVFLG))
+        temp = go_to_end(current->dir_cont);
     while(temp != NULL)
     {
         new = NULL;
         new = temp->path;
-        //new = new_path(current->path, temp->path);
-        //ft_printf("\tbuild_directory_charn:%s\n", new);
         if (new != NULL)
         {
             lstat(new, &temp->buffer);
-            if (S_ISDIR(temp->buffer.st_mode))
+            if (S_ISDIR(temp->buffer.st_mode) && not_hidden_dir(head, temp))
             {
                 dir_temp = new_dir(new);
                 stack_opndir(current, dir_temp);
@@ -330,7 +300,10 @@ void            build_directory_chain(t_opndir *head, int flags)
         }
         //if (new != NULL)
         //    free(new);
-        temp = temp->last;
+        if (flags & REVFLG)
+            temp = temp->next;
+        else
+            temp = temp->last;
     }
     
 }
@@ -347,6 +320,34 @@ void            run_stat_contents(t_cont *head)
     }
 }
 
+void        remove_directories(t_opndir *head)
+{
+    t_cont  *current;
+    t_cont  *before;
+    t_cont  *after;
+
+    current = head->dir_cont;
+    while (current != NULL)
+    {
+        if (!S_ISREG(current->buffer.st_mode))
+        {
+            before = current->last;
+            after = current->next;
+            if (before != NULL)
+                before->next = after;
+            if (after != NULL)
+                after->last = before;
+        }
+        if (before != NULL)
+            head->dir_cont = before;
+        else if (before == NULL && after != NULL)
+            head->dir_cont = after;
+        else if (before == NULL && after == NULL)
+            head->dir_cont = NULL;
+        current = after;
+    }   
+}
+
 /*
 **To assemble first queue. Either assembles the list of stated items
 ** OR makes current directory the only item in head list
@@ -356,7 +357,7 @@ t_opndir    *start_queue(int flags, char **argv)
 {
     t_opndir    *result;
     int y;
-
+    
     y = 1;
     //allocates memory for first list
     result = (t_opndir*)ft_memalloc(sizeof(t_opndir));
@@ -372,16 +373,14 @@ t_opndir    *start_queue(int flags, char **argv)
     {
         while (argv[y] != NULL)
         {
-            //run lstat on everything here path given from argv[y]
-            //if its a directory, place on the opndir queue
-            //if its a file, inject the name into the add_cont algorithm
             result->dir_cont = add_cont(argv[y], result->dir_cont, flags);
             y++;
         }
     }
     run_stat_contents(result->dir_cont);
     //if there are directories in the list
-    build_first_directory_chain(result, flags);
+    build_directory_chain(result, flags);
+    remove_directories(result);
     return (result);
 }
 
@@ -392,17 +391,19 @@ void    populate_dir(t_opndir *current, int flags)
     if (current == NULL)
         return;
     current->dir = opendir(current->path);
-    struct dirent *readdir(DIR *dirp);
+    //struct dirent *readdir(DIR *dirp);
+    if (current->dir == NULL)
+        return ;
     while ((current->dirent = readdir(current->dir)) != NULL)
     {
-        if ((RECFLG & flags) && current->path != NULL)
-        {
+        //if ((RECFLG & flags) && current->path != NULL)
+        //{
             new = new_path(current->path, current->dirent->d_name);
             if (new != NULL)
                 current->dir_cont = add_cont(new, current->dir_cont, flags);
-        }       
-        else
-            current->dir_cont = add_cont(current->dirent->d_name, current->dir_cont, flags);
+        //}       
+        //else
+         //   current->dir_cont = add_cont(current->dirent->d_name, current->dir_cont, flags);
     }
     closedir(current->dir);
 }
@@ -450,29 +451,42 @@ void    long_format_print(t_cont *current)
     //printf("%s %d ", ctime(&current->buffer.st_mtim.tm_mon), current->buffer.st_mtim.tm_mday);
     char    *time_str;
 
-    time_str = &ctime(&current->buffer.st_mtimespec.tv_sec)[4];
+        time_str = &ctime(&current->buffer.st_mtimespec.tv_sec)[4];
     ft_bzero(&time_str[12], 1);
-    ft_printf ("%s ", time_str);
+    ft_putstr(time_str);
+    ft_putchar(' ');
     //printf("%5 ", hour, minute) OR printf("%5d ", year)
-    }
+}
+
+int     multiple_dir(t_opndir *head)
+{
+    if (head->next != NULL)
+        return (1);
+    if (head->last != NULL && head->last->path != NULL)
+        return (1);
+    return (0);
+}
 
 void    print_dir_cont(t_opndir *current, int flags)
 {
     t_cont  *temp;
+    char    *name;
 
     temp = current->dir_cont;
-    if (flags & REVFLG)
-    {
-        while (temp->next != NULL)
-            temp = temp->next;
-    }
-    if (flags & RECFLG)
+    if (flags & RECFLG || multiple_dir(current))
     {
         if (current->path != NULL)
-            ft_printf("%s:\n", current->path);
+            ft_printf("\n%s:\n", current->path);
+        //here need to print number of blocks count blocks in a file and each file/directory gets its own start in terms of blocks 
     }
+    if (flags & REVFLG)
+    {
+        while (temp && temp->next != NULL)
+            temp = temp->next;
+    }  
     while(temp != NULL)
     {
+        name = temp->path;
         /*
 
             better method to not print hidden files. Lookfor dot from rear
@@ -483,9 +497,15 @@ void    print_dir_cont(t_opndir *current, int flags)
             temp = iterate_t_cont(temp, flags);
             continue;
         }*/
-        if (flags & LONGFLG)
+        //if (name != NULL && hidden_name(name))
+        //    name = &name[ft_strlen(name)];
+        name = ft_strrchr(name, '/') + 1;
+        if (!(flags & HIDFLG) && (name[0] == '.'))
+            name = NULL;
+        if (name != NULL && (flags & LONGFLG))
             long_format_print(temp);
-        ft_printf("%s\n", temp->path);
+        if (name)
+            ft_printf("%s\n", name);
         //need to insert here a way to print where to symbolic link leads to THEN a new line
         temp = iterate_t_cont(temp, flags);
     }
@@ -502,7 +522,7 @@ int     main(int argc, char **argv)
     while (head != NULL)
     {
         print_dir_cont(head, flags);
-        if ((flags & RECFLG) && head != NULL)
+        if ((flags & RECFLG))
             build_directory_chain(head, flags);
         head = head->next;
     }
