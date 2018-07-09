@@ -63,6 +63,6 @@ typedef struct          s_env
 
 void    populate_dir(t_opndir *current, int flags);
 char    *new_path(char *prev, char *curr);
-int             not_hidden_dir(t_opndir *head, t_cont *current);
+int             not_hidden_dir(t_opndir *head, t_cont *current, int flags);
 
 #endif

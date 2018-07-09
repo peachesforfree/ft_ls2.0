@@ -1,6 +1,7 @@
 /*********************************************
  * 
  * display number of blocks per directory on recursive search
+ * need to fix issue with not stating directory and assigning curent direcory "."
  * 
  * **********************************************/
 
@@ -242,25 +243,30 @@ int             hidden_name(char *str)
     return (0);
 }
 
-int             not_hidden_dir(t_opndir *head, t_cont *current)
+int             not_hidden_dir(t_opndir *head, t_cont *current, int flags)
 {
     char    *file;
+    int     len;
 
     if (head->path == NULL)
         return (1);         //working with first built directory chain
     file = ft_strstr(current->path, head->path);
     if (file != NULL)
         file = &file[ft_strlen(head->path) + 1];
-    if (ft_strlen(file) == 1 && file[0] == '.')
+    len = ft_strlen(file);
+    if (len == 1 && file[0] == '.')
     {
         //ft_printf("\t\t\thidden current dir\n");
         return (0);
     }
-    if (ft_strlen(file) == 2 && file[0] == '.' && file[1] == '.')
+    if (len == 2 && file[0] == '.' && file[1] == '.')
     {
         //ft_printf("\t\t\thidden previous dir\n");
         return (0);
-    }return (1);
+    }
+    if (len >= 1 && file[0] == '.' && !(flags & HIDFLG))
+        return (0);
+    return (1);
 }
 
 /*****************************
@@ -291,7 +297,7 @@ void            build_directory_chain(t_opndir *head, int flags)
         if (new != NULL)
         {
             lstat(new, &temp->buffer);
-            if (S_ISDIR(temp->buffer.st_mode) && not_hidden_dir(head, temp))
+            if (S_ISDIR(temp->buffer.st_mode) && not_hidden_dir(head, temp, flags))
             {
                 dir_temp = new_dir(new);
                 stack_opndir(current, dir_temp);
@@ -315,7 +321,7 @@ void            run_stat_contents(t_cont *head)
     current = head;
     while (current)
     {
-        lstat(current->path, &current->buffer);// == -1)
+        lstat(current->path, &current->buffer);
         current = current->next;
     }
 }
@@ -398,6 +404,8 @@ void    populate_dir(t_opndir *current, int flags)
     {
         //if ((RECFLG & flags) && current->path != NULL)
         //{
+            if (!(flags & HIDFLG) && (current->dirent->d_name[0] == '.'))
+                continue;
             new = new_path(current->path, current->dirent->d_name);
             if (new != NULL)
                 current->dir_cont = add_cont(new, current->dir_cont, flags);
@@ -467,6 +475,23 @@ int     multiple_dir(t_opndir *head)
     return (0);
 }
 
+int   print_blocks(t_opndir *head, int flags)
+{
+    int count;
+    t_cont  *temp;
+    (void) flags;
+
+    count = 0;
+    temp = head->dir_cont;
+    while (temp != NULL)
+    {
+        lstat(temp->path, &temp->buffer);
+        count += temp->buffer.st_blocks;
+        temp = temp->next;
+    }
+    return (count);
+} 
+
 void    print_dir_cont(t_opndir *current, int flags)
 {
     t_cont  *temp;
@@ -476,8 +501,7 @@ void    print_dir_cont(t_opndir *current, int flags)
     if (flags & RECFLG || multiple_dir(current))
     {
         if (current->path != NULL)
-            ft_printf("\n%s:\n", current->path);
-        //here need to print number of blocks count blocks in a file and each file/directory gets its own start in terms of blocks 
+            ft_printf("\n%s:\ntotal %d\n", current->path, print_blocks(current, flags));
     }
     if (flags & REVFLG)
     {
