@@ -6,7 +6,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceRoot}/a.out",
-            "args": ["-l", "fucks"],
+            "args": ["-l", "permission_dir"],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
             "environment": [],

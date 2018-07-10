@@ -1,7 +1,3 @@
-/*********************************************
- * line 551
- * **********************************************/
-
 #include "ft_ls.h"
 
 void    error_no_option(char c)
@@ -13,6 +9,7 @@ void    error_no_option(char c)
 int     flag_checker(char *flags, int argc, char **argv)
 {
     (void)argc;
+    (void) flags;
     int     result;
     int     y;
     int     x;
@@ -42,25 +39,11 @@ int     flag_checker(char *flags, int argc, char **argv)
             if (argv[y][x] != '\0' && (argv[y][0] == '-') && !ft_strchr(FLAGCHAR, argv[y][x]))
                 error_no_option(argv[y][x]);
         }
-        else if (!ft_strchr(flags, argv[y][x]))
+        else
             return (result);
         y++;
     }
     return (result);
-}
-
-void    print_flags(int flags)
-{
-    if (flags & LONGFLG)
-        printf("\tlong flag found\n");
-    if (flags & RECFLG)
-        printf("\trecursive flag found\n");
-    if (flags & HIDFLG)
-        printf("\thidden flag found\n");
-    if (flags & REVFLG)
-        printf("\tReverse flag found\n");
-    if (flags & TIMFLG)
-        printf("\ttime flag found\n");
 }
 
 t_cont      *new_cont(char *path, t_cont *before, t_cont *after)
@@ -87,7 +70,6 @@ t_cont        *insert_alpha(char *path, t_cont *head)
 {
     t_cont  *current;
 
-    //if first item in list, this will make it the head;
     if (head == NULL)
         return (new_cont(path, NULL, NULL));
     current = head;
@@ -128,13 +110,12 @@ t_cont      *insert_time(char *path, t_cont *head)
     temp = new_cont(path, NULL, NULL);
     lstat(temp->path, &temp->buffer);
     if (current == NULL)
-        return(temp);   //maybe move this to bottom of function?
+        return(temp);
     while (current != NULL)
     {
         if (current->buffer.st_mtimespec.tv_sec < temp->buffer.st_mtimespec.tv_sec
         || ((current->buffer.st_mtimespec.tv_sec == temp->buffer.st_mtimespec.tv_sec)
         && (current->buffer.st_mtimespec.tv_nsec < temp->buffer.st_mtimespec.tv_nsec)))
-    //    && current->buffer.st_mtimespec.tv_nsec < temp->buffer.st_mtimespec.tv_nsec)  //compares last modification down to the nanosecond
         {
             if (current->last == NULL)
             {
@@ -246,21 +227,15 @@ int             not_hidden_dir(t_opndir *head, t_cont *current, int flags)
     int     len;
 
     if (head->path == NULL)
-        return (1);         //working with first built directory chain
+        return (1);
     file = ft_strstr(current->path, head->path);
     if (file != NULL)
         file = &file[ft_strlen(head->path) + 1];
     len = ft_strlen(file);
     if (len == 1 && file[0] == '.')
-    {
-        //ft_printf("\t\t\thidden current dir\n");
         return (0);
-    }
     if (len == 2 && file[0] == '.' && file[1] == '.')
-    {
-        //ft_printf("\t\t\thidden previous dir\n");
         return (0);
-    }
     if (len >= 1 && file[0] == '.' && !(flags & HIDFLG))
         return (0);
     return (1);
@@ -301,8 +276,6 @@ void            build_directory_chain(t_opndir *head, int flags)
                 populate_dir(dir_temp, flags);
             }
         }
-        //if (new != NULL)
-        //    free(new);
         if (flags & REVFLG)
             temp = temp->next;
         else
@@ -374,17 +347,9 @@ t_opndir    *start_queue(int flags, char **argv, int argc)
     int y;
     
     y = 1;
-    //allocates memory for first list
     result = (t_opndir*)ft_memalloc(sizeof(t_opndir));
-    //jumps through the flag statements
     while (argv[y] != NULL && argv[y][0] == '-')
         y++;
-    //if there are no specififed files/directories
-    //if (y == 1 && argv[y] == NULL)
-    //  result->dir_cont = new_cont(".", NULL, NULL);
-    //else if there are other arguemnts in list and its not at end
-    //go into making the directory content chain and put user items in order
-    //else
     if (argc == y)
         result->dir_cont = new_cont(".", NULL, NULL);
     else
@@ -397,7 +362,6 @@ t_opndir    *start_queue(int flags, char **argv, int argc)
         }
     }
     run_stat_contents(result->dir_cont);
-    //if there are directories in the list
     build_directory_chain(result, flags);
     remove_directories(result);
     return (result);
@@ -410,21 +374,15 @@ void    populate_dir(t_opndir *current, int flags)
     if (current == NULL)
         return;
     current->dir = opendir(current->path);
-    //struct dirent *readdir(DIR *dirp);
     if (current->dir == NULL)
         return ;
     while ((current->dirent = readdir(current->dir)) != NULL)
     {
-        //if ((RECFLG & flags) && current->path != NULL)
-        //{
-            if (!(flags & HIDFLG) && (current->dirent->d_name[0] == '.'))
-                continue;
-            new = new_path(current->path, current->dirent->d_name);
-            if (new != NULL)
-                current->dir_cont = add_cont(new, current->dir_cont, flags);
-        //}       
-        //else
-         //   current->dir_cont = add_cont(current->dirent->d_name, current->dir_cont, flags);
+        if (!(flags & HIDFLG) && (current->dirent->d_name[0] == '.'))
+            continue;
+        new = new_path(current->path, current->dirent->d_name);
+        if (new != NULL)
+            current->dir_cont = add_cont(new, current->dir_cont, flags);
     }
     closedir(current->dir);
 }
@@ -483,7 +441,7 @@ int     multiple_dir(t_opndir *head)
 {
     if (head->next != NULL)
         return (1);
-    if (head->last != NULL && head->last->path != NULL)
+    else if (head->last != NULL && head->last->path != NULL)
         return (1);
     return (0);
 }
@@ -505,16 +463,41 @@ int   print_blocks(t_opndir *head, int flags)
     return (count);
 } 
 
+int     directory_permission_check(t_opndir *current)
+{
+    DIR   *dirent;
+    
+    if (current->path == NULL)
+        return (0);
+    errno = 0;
+    dirent = opendir(current->path);
+    if (errno != 0)
+    {
+        ft_printf("\n%s:\nft_ls: %s: %s\n", current->path, current->path, strerror(errno));
+        return (1);
+    }
+    closedir(dirent);
+    return (0);
+}
+
 void    print_dir_cont(t_opndir *current, int flags)
 {
     t_cont  *temp;
     char    *name;
 
     temp = current->dir_cont;
-    if (flags & RECFLG || multiple_dir(current))
+    
+    if ((flags & RECFLG || flags & LONGFLG || multiple_dir(current)) && temp != NULL)
     {
         if (current->path != NULL)
-            ft_printf("\n%s:\ntotal %d\n", current->path, print_blocks(current, flags));
+            ft_printf("\n%s:\n", current->path);
+    }
+    if (directory_permission_check(current))
+        return;
+    if ((flags & RECFLG || flags & LONGFLG || multiple_dir(current)) && temp != NULL)
+    {
+        if (current->path != NULL)
+            ft_printf("total %d\n", print_blocks(current, flags));
     }
     if (flags & REVFLG)
     {
@@ -544,7 +527,6 @@ void    print_dir_cont(t_opndir *current, int flags)
             readlink(temp->path, sylink, 1024);
             ft_printf(" -> %s", sylink);
         }
-        //write in function here for checking permissions and giving error if any
         if (name)
             ft_putchar('\n');
         temp = iterate_t_cont(temp, flags);
@@ -557,7 +539,6 @@ int     main(int argc, char **argv)
     t_opndir    *head;
 
     flags = flag_checker(FLAGCHAR, argc, argv);
-    //print_flags(flags); /**************************  for testing           */
     head = start_queue(flags, argv, argc);
     while (head != NULL)
     {

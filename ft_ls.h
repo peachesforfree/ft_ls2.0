@@ -14,6 +14,8 @@
 # include <grp.h>
 # include <time.h>
 # include "ft_printf/ft_printf.h"
+#include <errno.h>
+
 
 # define FLAGCHAR "-lRart"
 # define LONGFLG    0b00000001
@@ -61,8 +63,11 @@ typedef struct          s_env
     char                **dir;
 }                       t_env;
 
+extern int errno ;
+
+
 void    populate_dir(t_opndir *current, int flags);
 char    *new_path(char *prev, char *curr);
 int             not_hidden_dir(t_opndir *head, t_cont *current, int flags);
-
+int    directory_permission_check(t_opndir *current);
 #endif
