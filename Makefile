@@ -9,7 +9,8 @@ RM = rm -Rf
 SRC =	main.c \
 		flags.c \
 		new_item.c \
-		sort_algorithms.c \
+		alpha_sort.c \
+		time_sort.c \
 		print_long.c \
 		print_files.c \
 		linked_list_func.c \

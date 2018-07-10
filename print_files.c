@@ -31,10 +31,30 @@ void		link_name(t_cont *temp)
 	ft_printf(" -> %s", sylink);
 }
 
+void		cont(t_cont *temp, int flags)
+{
+	char	*name;
+
+	name = temp->path;
+	if ((name = ft_strrchr(name, '/')) != NULL)
+		name += 1;
+	else
+		name = temp->path;
+	if (!(flags & HIDFLG) && name && (name[0] == '.'))
+		name = NULL;
+	if (name != NULL && (flags & LONGFLG))
+		long_format_print(temp);
+	if (name)
+		ft_putstr(name);
+	if (S_ISLNK(temp->buffer.st_mode) && (flags & LONGFLG))
+		link_name(temp);
+	if (name)
+		ft_putchar('\n');
+}
+
 void		print_dir_cont(t_opndir *current, int flags)
 {
 	t_cont		*temp;
-	char		*name;
 
 	temp = current->dir_cont;
 	if ((flags & RECFLG || flags & LONGFLG ||
@@ -52,21 +72,7 @@ void		print_dir_cont(t_opndir *current, int flags)
 			temp = temp->next;
 	while (temp != NULL)
 	{
-		name = temp->path;
-		if ((name = ft_strrchr(name, '/')) != NULL)
-			name += 1;
-		else
-			name = temp->path;
-		if (!(flags & HIDFLG) && name && (name[0] == '.'))
-			name = NULL;
-		if (name != NULL && (flags & LONGFLG))
-			long_format_print(temp);
-		if (name)
-			ft_putstr(name);
-		if (S_ISLNK(temp->buffer.st_mode) && (flags & LONGFLG))
-			link_name(temp);
-		if (name)
-			ft_putchar('\n');
+		cont(temp, flags);
 		temp = iterate_t_cont(temp, flags);
 	}
 }
