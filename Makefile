@@ -6,7 +6,14 @@ FLAGS = -Wall -Werror -Wextra
 
 RM = rm -Rf
 
-SRC =	main.c
+SRC =	main.c \
+		flags.c \
+		new_item.c \
+		sort_algorithms.c \
+		print_long.c \
+		print_files.c \
+		linked_list_func.c \
+		start_queue.c
 
 INC =	ft_ls.h \
 		libft/libft.a \
