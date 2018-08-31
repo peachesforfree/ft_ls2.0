@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_ls.h"
+#include "../includes/ft_ls.h"
 
 t_cont		*new_cont(char *path, t_cont *before, t_cont *after)
 {

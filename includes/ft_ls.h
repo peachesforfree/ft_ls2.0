@@ -19,11 +19,11 @@
 # include <dirent.h>
 # include <strings.h>
 # include <stdbool.h>
-# include "libft/libft.h"
+# include "../libft/libft.h"
 # include <pwd.h>
 # include <grp.h>
 # include <time.h>
-# include "ft_printf/ft_printf.h"
+# include "../ft_printf/ft_printf.h"
 # include <errno.h>
 
 # define FLAGCHAR "-lRart"

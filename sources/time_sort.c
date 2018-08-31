@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_ls.h"
+#include "../includes/ft_ls.h"
 
 t_cont		*secondary(t_cont *temp, t_cont *current, t_cont *head)
 {
