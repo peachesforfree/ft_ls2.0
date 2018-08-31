@@ -52,11 +52,18 @@ void		cont(t_cont *temp, int flags)
 		ft_putchar('\n');
 }
 
+t_cont	*find_start(t_cont *current)
+{
+	while (current && current->last != NULL)
+		current = current->last;
+	return (current);
+}
+
 void		print_dir_cont(t_opndir *current, int flags)
 {
 	t_cont		*temp;
 
-	temp = current->dir_cont;
+	temp = find_start(current->dir_cont);
 	if ((flags & RECFLG || flags & LONGFLG ||
 		multiple_dir(current)) && temp != NULL)
 		if (current->path != NULL)
