@@ -91,7 +91,9 @@ void		get_format_stats(t_opndir *master)
 
 int			new_line(t_opndir *master)
 {
-	if (master->last->last != NULL)
+	if (master->last->last != NULL && master->last->path != NULL)
+		ft_printf("\n");
+	else if (master->last->path == NULL && master->last->dir_cont != NULL)
 		ft_printf("\n");
 	if (master->last->last == NULL)
 	{
@@ -108,10 +110,9 @@ void		print_dir_cont(t_opndir *current, int flags)
 
 	if (current->format == NULL)
 		get_format_stats(current);
-	//temp = find_start(current->dir_cont);
 	temp = current->dir_cont;
 	if ((flags & RECFLG || flags & LONGFLG ||
-		multiple_dir(current)) && temp != NULL)
+		multiple_dir(current))) //&& temp != NULL)
 		if (current->path != NULL && new_line(current))
 			ft_printf("%s:\n", current->path);
 	if (directory_permission_check(current))

@@ -54,7 +54,9 @@ int			not_hidden_dir(t_opndir *head, t_cont *current, int flags)
 	len = ft_strlen(file);
 	if (len == 1 && file[0] == '.')
 		return (0);
-	if (len == 2 && file[0] == '.' && file[1] == '.')
+	if (len == 2 && file[0] == '.' && (file[1] == '.' || file[1] == '/'))
+		return (0);
+	if (len == 3 && file[0] == '.' && file[1] == '.' && file[2] == '/' )
 		return (0);
 	if (len >= 1 && file[0] == '.' && !(flags & HIDFLG))
 		return (0);
@@ -68,7 +70,7 @@ int			main(int argc, char **argv)
 //	t_opndir	*temp;8
 
 	flags = flag_checker(argv);
-	if (flags <= 0)
+	if (flags < 0)
 		return (1);
 	head = start_queue(flags, argv, argc);
 	while (head != NULL)

@@ -90,6 +90,16 @@ void		populate_dir(t_opndir *current, int flags)
 	closedir(current->dir);
 }
 
+// void		print_cont_list(t_cont *head)
+// {
+// 	while (head)
+// 	{
+// 		dprintf(2,"ENTERED:%s\n", head->path);
+// 		head = head->next;
+// 	}
+// 															//remove when done
+// }
+
 /*
 **To assemble first queue. Either assembles the list of stated items
 ** OR makes current directory the only item in head list
@@ -104,7 +114,8 @@ t_opndir	*start_queue(int flags, char **argv, int argc)
 	result = (t_opndir*)ft_memalloc(sizeof(t_opndir));
 	while (argv[y] != NULL && argv[y][0] == '-' && argv[y][1] != '\0')
 		y++;
-	if (argc == y)
+	if (y == 
+	argc)
 		result->dir_cont = new_cont(".", NULL, NULL);
 	else
 	{
