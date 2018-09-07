@@ -45,8 +45,8 @@ int			flag_checker(char **argv)
 				x++;
 			}
 			if (argv[y][x] != '\0' && (argv[y][0] == '-') &&
-			!ft_strchr(FLAGCHAR, argv[y][x]))
-				error_no_option(argv[y][x]);
+			(ft_strchr(FLAGCHAR, argv[y][x]) == NULL))
+				return(error_no_option(argv[y][x]));
 		}
 		else
 			return (result);

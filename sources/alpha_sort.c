@@ -12,26 +12,6 @@
 
 #include "../includes/ft_ls.h"
 
-int			derps(char *path, t_cont *current)
-{
-	if (current->next == NULL)
-	{
-		new_cont(path, current, NULL);
-		return (1);
-	}
-	return (0);
-}
-
-int			ferps(t_cont *current, char *path, t_cont *head)
-{
-	if (current->last == NULL)
-	{
-		head = new_cont(path, NULL, current);
-		return (1);
-	}
-	return (0);
-}
-
 t_cont		*insert_alpha(char *path, t_cont *head)
 {
 	t_cont	*current;
@@ -43,17 +23,18 @@ t_cont		*insert_alpha(char *path, t_cont *head)
 	{
 		if (ft_strcmp(current->path, path) >= 0)
 		{
-			if (ferps(current, path, head))
-				break ;
+			if (current->last == NULL)
+				head = new_cont(path, NULL, current);
 			else
-			{
 				new_cont(path, current->last, current);
-				break ;
-			}
+			break;
 		}
 		else if (ft_strcmp(current->path, path) < 0)
-			if (derps(path, current))
-				break ;
+			if (current->next == NULL)
+			{
+				new_cont(path, current, NULL);
+				break;
+			}
 		current = current->next;
 	}
 	return (head);

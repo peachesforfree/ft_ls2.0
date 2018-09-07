@@ -38,7 +38,19 @@ void		continued(t_cont *current)
 	ft_putstr(time_str);
 }
 
-void		long_format_print(t_cont *current)
+char		*format_ls_str(int number, char *c)
+{
+	char	*ret;
+
+	ret = ft_strnjoin("% ", ft_itoa(number + 2), 2);
+	ret = ft_strnjoin(ret, c, 1);
+	//"% 3d"
+	//"% 5lld "
+	//dprintf(2,"FORMAT:%s\n", ret);
+	return (ret);
+}
+
+void		long_format_print(t_cont *current, t_format *format)
 {
 	lstat(current->path, &current->buffer);
 	if (S_ISREG(current->buffer.st_mode))
@@ -56,10 +68,10 @@ void		long_format_print(t_cont *current)
 	ft_putchar((S_IROTH & current->buffer.st_mode) ? 'r' : '-');
 	ft_putchar((S_IWOTH & current->buffer.st_mode) ? 'w' : '-');
 	ft_putchar((S_IXOTH & current->buffer.st_mode) ? 'x' : '-');
-	ft_printf("%3d", current->buffer.st_nlink);
-	ft_printf(" %s ", getpwuid(current->buffer.st_uid)->pw_name);
+	ft_printf(format_ls_str(format->digit_count_hard,"d "), current->buffer.st_nlink);
+	ft_printf("%s ", getpwuid(current->buffer.st_uid)->pw_name);
 	ft_printf(" %s", getgrgid(current->buffer.st_gid)->gr_name);
-	ft_printf("%8lld ", current->buffer.st_size);
+	ft_printf(format_ls_str(format->digit_count_size,"d "), current->buffer.st_size);
 	continued(current);
 	ft_putchar(' ');
 }

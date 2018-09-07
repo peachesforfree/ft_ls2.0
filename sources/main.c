@@ -19,17 +19,17 @@ char		*new_path(char *prev, char *curr)
 	temp = NULL;
 	if (prev[ft_strlen(prev) - 1] != '/')
 		temp = ft_strjoin(prev, "/");
-	else
-		temp = prev;
+	 else
+	 	temp = prev;
 	temp = ft_strjoin(temp, curr);
 	return (temp);
 }
 
-void		error_no_option(char c)
+int			error_no_option(char c)
 {
 	ft_printf("ls: illegal option -- ");
 	ft_printf("%c\nusage: ls [%s] [file ...]\n", c, FLAGCHAR);
-	exit(0);
+	return (-1);
 }
 
 int			hidden_name(char *str)
@@ -65,8 +65,11 @@ int			main(int argc, char **argv)
 {
 	int			flags;
 	t_opndir	*head;
+//	t_opndir	*temp;8
 
 	flags = flag_checker(argv);
+	if (flags <= 0)
+		return (1);
 	head = start_queue(flags, argv, argc);
 	while (head != NULL)
 	{
@@ -75,5 +78,6 @@ int			main(int argc, char **argv)
 			build_directory_chain(head, flags);
 		head = head->next;
 	}
+//	free_all();
 	return (0);
 }

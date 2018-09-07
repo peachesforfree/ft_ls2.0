@@ -102,7 +102,7 @@ t_opndir	*start_queue(int flags, char **argv, int argc)
 
 	y = 1;
 	result = (t_opndir*)ft_memalloc(sizeof(t_opndir));
-	while (argv[y] != NULL && argv[y][0] == '-')
+	while (argv[y] != NULL && argv[y][0] == '-' && argv[y][1] != '\0')
 		y++;
 	if (argc == y)
 		result->dir_cont = new_cont(".", NULL, NULL);

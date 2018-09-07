@@ -26,13 +26,21 @@
 # include "../ft_printf/ft_printf.h"
 # include <errno.h>
 
-# define FLAGCHAR "-lRart"
+#include <stdio.h>
+
+# define FLAGCHAR "-lRart1"
 # define LONGFLG    0b00000001
 # define RECFLG     0b00000010
 # define HIDFLG     0b00000100
 # define REVFLG     0b00001000
 # define TIMFLG     0b00010000
 # define NOOPTION   1
+
+typedef struct		s_format
+{
+	int				digit_count_hard;
+	int				digit_count_size;
+}					t_format;
 
 typedef struct		s_cont
 {
@@ -50,6 +58,7 @@ typedef struct		s_opndir
 	struct s_cont	*dir_cont;
 	struct s_opndir	*next;
 	struct s_opndir	*last;
+	struct s_format	*format;
 }					t_opndir;
 
 void				populate_dir(t_opndir *current, int flags);
@@ -57,7 +66,7 @@ char				*new_path(char *prev, char *curr);
 int					not_hidden_dir(t_opndir *head, t_cont *current, int flags);
 int					directory_permission_check(t_opndir *current);
 int					flag_checker(char **argv);
-void				error_no_option(char c);
+int					error_no_option(char c);
 t_cont				*new_cont(char *path, t_cont *before, t_cont *after);
 t_cont				*add_cont(char *path, t_cont *head, int flags);
 t_opndir			*new_dir(char *path);
@@ -66,7 +75,7 @@ void				enqueue_dir(t_opndir *head, t_opndir *new);
 char				*new_path(char *prev, char *curr);
 t_cont				*insert_time(char *path, t_cont *head);
 t_cont				*insert_alpha(char *path, t_cont *head);
-void				long_format_print(t_cont *current);
+void				long_format_print(t_cont *current, t_format *format);
 int					print_blocks(t_opndir *head, int flags);
 t_cont				*iterate_t_cont(t_cont *temp, int flags);
 void				print_dir_cont(t_opndir *current, int flags);
