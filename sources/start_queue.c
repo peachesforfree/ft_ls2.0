@@ -105,29 +105,55 @@ void		populate_dir(t_opndir *current, int flags)
 ** OR makes current directory the only item in head list
 */
 
+void		print_full_chain(t_opndir *head)
+{
+	t_opndir	*temp;
+	t_cont		*files;
+
+	temp = head;
+	while (temp != NULL)
+	{
+		files = temp->dir_cont;
+		dprintf(2, "\t\tPATH:%s\n", temp->path);
+		while (files != NULL)
+		{
+			dprintf(2, "\t\t\t\tCONT:%s\n", files->path);
+			files = files->next;
+		}
+		temp = temp->next;
+	}
+}
+
 t_opndir	*start_queue(int flags, char **argv, int argc)
 {
 	t_opndir	*result;
 	int			y;
+	(void) argc;
 
 	y = 1;
 	result = (t_opndir*)ft_memalloc(sizeof(t_opndir));
 	while (argv[y] != NULL && argv[y][0] == '-' && argv[y][1] != '\0')
 		y++;
-	if (y == 
-	argc)
-		result->dir_cont = new_cont(".", NULL, NULL);
+	//checking if there are no arguments. 
+	if (y == argc)// || ((y + 1 == argc) && (ft_strlen(argv[y]) == 1) && (argv[y][0] == '.')))
+	{
+		result->path = ft_strdup(".");
+		populate_dir(result, flags);
+	}
 	else
 	{
 		while (argv[y] != NULL)
 		{
 			if (does_exist(argv[y]))
+			{
 				result->dir_cont = add_cont(argv[y], result->dir_cont, flags);
+			}
 			y++;
 		}
+
+		build_directory_chain(result, flags);
 	}
-	run_stat_contents(result->dir_cont);
-	build_directory_chain(result, flags);
+	//run_stat_contents(result->dir_cont);
 	remove_directories(result);
 	return (result);
 }

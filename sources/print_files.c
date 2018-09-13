@@ -91,15 +91,25 @@ void		get_format_stats(t_opndir *master)
 
 int			new_line(t_opndir *master)
 {
-	if (master->last->last != NULL && master->last->path != NULL)
+	if (master->last != NULL && master->last->path == NULL && master->last->dir_cont != NULL)
 		ft_printf("\n");
-	else if (master->last->path == NULL && master->last->dir_cont != NULL)
-		ft_printf("\n");
-	if (master->last->last == NULL)
+	else if (master->last != NULL && master->last->path != NULL)
+	 	ft_printf("\n");
+	// if (master->last && master->last->last != NULL && master->last->path != NULL)
+	// {
+	// 	ft_printf("\n");
+
+	// }
+	// else if (master->last && master->last->path == NULL && master->last->dir_cont != NULL)
+	// {	
+	// 	ft_printf("\n");
+	// }
+	if (master->last && master->last->path == NULL)
 	{
 		if(master->next == NULL)
 			return (0);
-		return (1);
+		//return (1);
+	//		ft_printf("\n");
 	}
 	return (1);
 }
@@ -108,13 +118,40 @@ void		print_dir_cont(t_opndir *current, int flags)
 {
 	t_cont		*temp;
 
-	if (current->format == NULL)
-		get_format_stats(current);
+	
+	//if (current->format == NULL)
+	get_format_stats(current);
 	temp = current->dir_cont;
-	if ((flags & RECFLG || flags & LONGFLG ||
-		multiple_dir(current))) //&& temp != NULL)
-		if (current->path != NULL && new_line(current))
-			ft_printf("%s:\n", current->path);
+
+	t_cont *derp = current->dir_cont;
+	if (derp)
+	{
+		while(derp->last != NULL)
+			derp = derp->last;
+		while (derp != NULL)
+		{
+			//dprintf(2, "\t2\tcont_path:%s\n", derp->path);
+			derp = derp->next;
+		}
+	}
+	
+	// t_cont *printer = current->dir_cont;
+	// if (printer)
+	// {
+	// 	while(printer->last != NULL)
+	// 		printer = printer->last;
+	// 	while (printer != NULL)
+	// 	{
+	// 		dprintf(2, "\tcont_path:%s\t", printer->path);
+	// 		printer = printer->next;
+	// 	}
+	// 		dprintf(2, "\n\n");
+
+	// }
+	if (current->last != NULL && new_line(current))//multiple_dir(current) && current->path != NULL && new_line(current))//flags & RECFLG || flags & LONGFLG || //&& temp != NULL)
+		ft_printf("%s:\n", current->path);
+	//dprintf(2, "%s\t%d\t%d\n",current->path, multiple_dir(current), new_line(current));
+	
 	if (directory_permission_check(current))
 		return ;
 	if ((flags & LONGFLG ||
@@ -124,6 +161,7 @@ void		print_dir_cont(t_opndir *current, int flags)
 	if (flags & REVFLG)
 		while (temp && temp->next != NULL)
 			temp = temp->next;
+	//dprintf(2, "TEST\topndir:%s\n", current->path);
 	while (temp != NULL)
 	{
 		cont(temp, flags, current);

@@ -87,4 +87,8 @@ void				populate_dir(t_opndir *current, int flags);
 int					directory_permission_check(t_opndir *current);
 void				remove_directories(t_opndir *head);
 
+
+
+void		print_full_chain(t_opndir *head);
+
 #endif

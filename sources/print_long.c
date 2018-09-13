@@ -41,12 +41,16 @@ void		continued(t_cont *current)
 char		*format_ls_str(int number, char *c)
 {
 	char	*ret;
+	char	*ret_number;
 
-	ret = ft_strnjoin("% ", ft_itoa(number + 2), 2);
-	ret = ft_strnjoin(ret, c, 1);
+	//dprintf(2, "NUMBERS:%d\n", number);
+	ret_number = ft_itoa(number + 1);
+
+	ret = ft_strjoin(" % ", ret_number);
+	ret = ft_strjoin(ret, c);
 	//"% 3d"
 	//"% 5lld "
-	//dprintf(2,"FORMAT:%s\n", ret);
+	//dprintf(2,"\t\t\tFORMAT:%s\n", ret);
 	return (ret);
 }
 

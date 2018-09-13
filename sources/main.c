@@ -10,6 +10,15 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+/*
+	problem with printing results
+
+	need to look into the stat buffer in void		get_format_stats(t_opndir *master) in print_files.c
+	wrong value from struct is being used and need to find the right one.
+	its screwing up values in the moulitest
+
+*/
+
 #include "../includes/ft_ls.h"
 
 char		*new_path(char *prev, char *curr)
@@ -32,20 +41,12 @@ int			error_no_option(char c)
 	return (-1);
 }
 
-int			hidden_name(char *str)
-{
-	if (ft_strlen(str) == 1 && str[0] == '.')
-		return (1);
-	if (ft_strlen(str) == 2 && str[0] == '.' && str[1] == '.')
-		return (1);
-	return (0);
-}
-
 int			not_hidden_dir(t_opndir *head, t_cont *current, int flags)
 {
 	char	*file;
 	int		len;
 
+	//dprintf(2, "head->path:%s\tcurrent->path:%s\n",head->path, current->path);
 	if (head->path == NULL)
 		return (1);
 	file = ft_strstr(current->path, head->path);
@@ -77,7 +78,7 @@ int			main(int argc, char **argv)
 	{
 		print_dir_cont(head, flags);
 		if ((flags & RECFLG))
-			build_directory_chain(head, flags);
+			build_directory_chain(head, flags + HIDFLG);
 		head = head->next;
 	}
 //	free_all();

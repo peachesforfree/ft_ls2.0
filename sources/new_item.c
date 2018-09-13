@@ -49,22 +49,6 @@ t_opndir	*new_dir(char *path)
 	return (temp);
 }
 
-void remove_cont(t_opndir *head, char *path)
-{
-    t_cont *temp;
-
-	temp = head->dir_cont;
-	/*
-
-this is where I last left off.
-need to look through each element in the content of head.
-will compare each content path with the path given.
-when found, remove/free that one item and bridge the two before and after the removed element
-keep into account if at end or the beggining of the end of the linked list
-
-	*/
-
-}
 
 void		stack_opndir(t_opndir *current, t_opndir *new)
 {
@@ -80,7 +64,7 @@ void		stack_opndir(t_opndir *current, t_opndir *new)
 		temp->last = new;
 		new->next = temp;
 	}
-	current->dir_cont = remove_cont(current->dir_cont, new->path);
+	//remove_cont(current, new->path);
 }
 
 void		enqueue_dir(t_opndir *head, t_opndir *new)
