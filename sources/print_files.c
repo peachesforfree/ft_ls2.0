@@ -63,7 +63,7 @@ void		get_format_stats(t_opndir *master)
 	master->format->digit_count_hard = 0;
 	master->format->digit_count_size = 0;
 	temp = master->dir_cont;
-	while (temp && !lstat(temp->path, &buffer))
+	while (temp && !lstat(temp->path, &buffer) )
 	{
 		//dprintf(2, "st_nlink:%d\nst_size:%lld\n",buffer.st_nlink, buffer.st_size);
 		if (master->format->digit_count_hard < buffer.st_nlink)
@@ -86,7 +86,6 @@ void		get_format_stats(t_opndir *master)
 		i++;
 	}
 	master->format->digit_count_size = i;
-	//dprintf(2, "Hard link digit count:%d\nfile byte size digit count:%d\n", master->format->digit_count_hard,master->format->digit_count_size);
 }
 
 int			new_line(t_opndir *master)

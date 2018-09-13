@@ -42,10 +42,13 @@ void		remove_directories(t_opndir *head)
 
 int			directory_permission_check(t_opndir *current)
 {
-	DIR		*dirent;
+	DIR			*dirent;
+	//struct stat	buffer;
 
 	if (current->path == NULL)
 		return (0);
+	// if ((lstat(current->path, &buffer) >= 0) && (buffer.st_mode | S_IROTH))
+	// 	return (0);
 	errno = 0;
 	dirent = opendir(current->path);
 	if (errno != 0)
@@ -81,7 +84,7 @@ void		populate_dir(t_opndir *current, int flags)
 		return ;
 	while ((current->dirent = readdir(current->dir)) != NULL)
 	{
-		if (!(flags & HIDFLG) && (current->dirent->d_name[0] == '.'))
+		if ((flags | HIDFLG) && (current->dirent->d_name[0] == '.'))
 			continue;
 		new = new_path(current->path, current->dirent->d_name);
 		if (new != NULL)

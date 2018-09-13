@@ -75,6 +75,7 @@ void		long_format_print(t_cont *current, t_format *format)
 	ft_printf(format_ls_str(format->digit_count_hard,"d "), current->buffer.st_nlink);
 	ft_printf("%s ", getpwuid(current->buffer.st_uid)->pw_name);
 	ft_printf(" %s", getgrgid(current->buffer.st_gid)->gr_name);
+	//dprintf(2, "\n\tFILE:%s\tSIZE:%lld\tDigits:%d\n", current->path,current->buffer.st_size, format->digit_count_size);
 	ft_printf(format_ls_str(format->digit_count_size,"d "), current->buffer.st_size);
 	continued(current);
 	ft_putchar(' ');
