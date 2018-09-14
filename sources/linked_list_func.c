@@ -125,8 +125,8 @@ void		build_directory_chain(t_opndir *head, int flags)
 	while (temp != NULL)
 	{
 			lstat(temp->path, &temp->buffer);
-			if (S_ISDIR(temp->buffer.st_mode) && 
-			not_hidden_dir(head, temp, flags))
+			if (S_ISDIR(temp->buffer.st_mode))// && 
+			//not_hidden_dir(head, temp, flags))
 			{
 				dir_temp = new_dir(temp->path);
 				stack_opndir(current, dir_temp);

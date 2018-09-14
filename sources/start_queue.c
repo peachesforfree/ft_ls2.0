@@ -53,8 +53,8 @@ int			directory_permission_check(t_opndir *current)
 	dirent = opendir(current->path);
 	if (errno != 0)
 	{
-		ft_printf("\n%s:\nft_ls: %s: %s\n", current->path,
-		current->path, strerror(errno));
+	//	ft_printf("\n%s:\nft_ls: %s: %s\n", current->path,
+	//	current->path, strerror(errno));
 		return (1);
 	}
 	closedir(dirent);
@@ -67,7 +67,8 @@ int			does_exist(char *str)
 
 	if (lstat(str, &buffer) < 0)
 	{
-		ft_printf("ft_ls: %s: No such file or directory\n", str);
+		//ft_printf("ft_ls: %s: No such file or directory\n", str);	
+		ft_printf("ls: %s: No such file or directory\n", str);
 		return (0);
 	}
 	return (1);
@@ -84,7 +85,7 @@ void		populate_dir(t_opndir *current, int flags)
 		return ;
 	while ((current->dirent = readdir(current->dir)) != NULL)
 	{
-		if ((flags | HIDFLG) && (current->dirent->d_name[0] == '.'))
+		if (!(flags & HIDFLG) && (current->dirent->d_name[0] == '.'))
 			continue;
 		new = new_path(current->path, current->dirent->d_name);
 		if (new != NULL)
@@ -151,6 +152,8 @@ t_opndir	*start_queue(int flags, char **argv, int argc)
 			{
 				result->dir_cont = add_cont(argv[y], result->dir_cont, flags);
 			}
+			else
+				result->flgs = 1;
 			y++;
 		}
 

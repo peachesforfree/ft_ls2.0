@@ -34,12 +34,15 @@
 # define HIDFLG     0b00000100
 # define REVFLG     0b00001000
 # define TIMFLG     0b00010000
+# define DIRCNT		0b00100000
 # define NOOPTION   1
 
 typedef struct		s_format
 {
 	int				digit_count_hard;
 	int				digit_count_size;
+	int				len_owner;
+	int				len_group;
 }					t_format;
 
 typedef struct		s_cont
@@ -59,6 +62,7 @@ typedef struct		s_opndir
 	struct s_opndir	*next;
 	struct s_opndir	*last;
 	struct s_format	*format;
+	int				flgs;
 }					t_opndir;
 
 void				populate_dir(t_opndir *current, int flags);

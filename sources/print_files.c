@@ -57,11 +57,14 @@ void		get_format_stats(t_opndir *master)
 	t_cont		*temp;
 	int			i;
 	struct stat	buffer;
+	int			len;
 
 	if (master->format == NULL)
 		master->format = (t_format*)ft_memalloc(sizeof(t_format));
-	master->format->digit_count_hard = 0;
-	master->format->digit_count_size = 0;
+//	master->format->digit_count_hard = 0;
+//	master->format->digit_count_size = 0;
+//	master->format->len_owner = 0;
+//	master->format->len_group = 0;
 	temp = master->dir_cont;
 	while (temp && !lstat(temp->path, &buffer) )
 	{
@@ -70,6 +73,12 @@ void		get_format_stats(t_opndir *master)
 			master->format->digit_count_hard = buffer.st_nlink;
 		if (master->format->digit_count_size < buffer.st_size)
 			master->format->digit_count_size = buffer.st_size;
+		len = ft_strlen(getpwuid(buffer.st_uid)->pw_name);
+		if (master->format->len_owner < len)
+			master->format->len_owner = len;
+		len = ft_strlen(getgrgid(buffer.st_gid)->gr_name);
+		if (master->format->len_group < len)
+			master->format->len_group = len;
 		temp = temp->next;
 	}
 	i = 1;
@@ -103,13 +112,10 @@ int			new_line(t_opndir *master)
 	// {	
 	// 	ft_printf("\n");
 	// }
-	if (master->last && master->last->path == NULL)
-	{
-		if(master->next == NULL)
-			return (0);
+	if(master->next == NULL && master->last != NULL && master->last->path == NULL && master->last->dir_cont == NULL && master->last->flgs != 1)
+		return (0);
 		//return (1);
 	//		ft_printf("\n");
-	}
 	return (1);
 }
 

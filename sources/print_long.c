@@ -54,27 +54,67 @@ char		*format_ls_str(int number, char *c)
 	return (ret);
 }
 
+void		leading_bit(struct stat *buffer)
+{
+	if (S_ISDIR(buffer->st_mode))
+		ft_putchar('d');
+	else if (S_ISLNK(buffer->st_mode))
+		ft_putchar('l');
+	else if (S_ISBLK(buffer->st_mode))
+		ft_putchar('b');
+	else if (S_ISCHR(buffer->st_mode))
+		ft_putchar('c');
+	else if (S_ISSOCK(buffer->st_mode))
+		ft_putchar('s');
+	else if (S_ISFIFO(buffer->st_mode))
+		ft_putchar('p');
+	else
+		ft_putchar('-');
+}
+
+void		last_bit(struct stat *buffer)
+{
+	if (S_IROTH & buffer->st_mode)
+		ft_putchar('r');
+	else
+		ft_putchar('-');
+	if (S_IWOTH & buffer->st_mode)
+		ft_putchar('w');
+	else
+		ft_putchar('-');
+	if (S_IXOTH & buffer->st_mode)
+		ft_putchar('x');
+	else if (S_ISVTX & buffer->st_mode && (!(S_IXOTH & buffer->st_mode) || !(S_IWOTH & buffer->st_mode)))
+		ft_putchar('T');
+	else if (S_ISVTX & buffer->st_mode && (S_IXOTH & buffer->st_mode || S_IWOTH & buffer->st_mode))
+		ft_putchar('t');
+	else
+		ft_putchar('-');
+}
+
+char		*format_name_str(int len, char *str)
+{
+	char *ret;
+
+	ret = ft_strnjoin("%- ", ft_itoa(len), 2);
+	ret = ft_strnjoin(ret, str, 1);
+	return (ret);
+}
+
 void		long_format_print(t_cont *current, t_format *format)
 {
 	lstat(current->path, &current->buffer);
-	if (S_ISREG(current->buffer.st_mode))
-		ft_putchar('-');
-	else if (S_ISDIR(current->buffer.st_mode))
-		ft_putchar('d');
-	else if (S_ISLNK(current->buffer.st_mode))
-		ft_putchar('l');
+	leading_bit(&current->buffer);
 	ft_putchar((S_IRUSR & current->buffer.st_mode) ? 'r' : '-');
 	ft_putchar((S_IWUSR & current->buffer.st_mode) ? 'w' : '-');
 	ft_putchar((S_IXUSR & current->buffer.st_mode) ? 'x' : '-');
 	ft_putchar((S_IRGRP & current->buffer.st_mode) ? 'r' : '-');
 	ft_putchar((S_IWGRP & current->buffer.st_mode) ? 'w' : '-');
 	ft_putchar((S_IXGRP & current->buffer.st_mode) ? 'x' : '-');
-	ft_putchar((S_IROTH & current->buffer.st_mode) ? 'r' : '-');
-	ft_putchar((S_IWOTH & current->buffer.st_mode) ? 'w' : '-');
-	ft_putchar((S_IXOTH & current->buffer.st_mode) ? 'x' : '-');
+	last_bit(&current->buffer);
 	ft_printf(format_ls_str(format->digit_count_hard,"d "), current->buffer.st_nlink);
-	ft_printf("%s ", getpwuid(current->buffer.st_uid)->pw_name);
-	ft_printf(" %s", getgrgid(current->buffer.st_gid)->gr_name);
+	ft_printf(format_name_str(format->len_owner, "s  "), getpwuid(current->buffer.st_uid)->pw_name);
+	ft_printf(format_name_str(format->len_group, "s"), getgrgid(current->buffer.st_gid)->gr_name);
 	//dprintf(2, "\n\tFILE:%s\tSIZE:%lld\tDigits:%d\n", current->path,current->buffer.st_size, format->digit_count_size);
 	ft_printf(format_ls_str(format->digit_count_size,"d "), current->buffer.st_size);
 	continued(current);

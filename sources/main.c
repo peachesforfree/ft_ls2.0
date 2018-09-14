@@ -70,6 +70,11 @@ int			main(int argc, char **argv)
 	t_opndir	*head;
 //	t_opndir	*temp;8
 
+	// int i;
+	// for (i = 0; i < argc; i = i + 1)
+	// 	dprintf(2, "\tUSER IN:%s\n", argv[i]);
+
+	
 	flags = flag_checker(argv);
 	if (flags < 0)
 		return (1);
@@ -78,7 +83,7 @@ int			main(int argc, char **argv)
 	{
 		print_dir_cont(head, flags);
 		if ((flags & RECFLG))
-			build_directory_chain(head, flags + HIDFLG);
+			build_directory_chain(head, flags);
 		head = head->next;
 	}
 //	free_all();
