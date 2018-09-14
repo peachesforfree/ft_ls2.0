@@ -68,7 +68,7 @@ int			main(int argc, char **argv)
 {
 	int			flags;
 	t_opndir	*head;
-//	t_opndir	*temp;8
+	t_opndir	*temp;
 
 	// int i;
 	// for (i = 0; i < argc; i = i + 1)
@@ -79,13 +79,16 @@ int			main(int argc, char **argv)
 	if (flags < 0)
 		return (1);
 	head = start_queue(flags, argv, argc);
-	while (head != NULL)
+	temp = head;
+	while (temp != NULL)
 	{
-		print_dir_cont(head, flags);
+		print_dir_cont(temp, flags);
 		if ((flags & RECFLG))
-			build_directory_chain(head, flags);
-		head = head->next;
+			build_directory_chain(temp, flags);
+		temp = temp->next;
 	}
+	if (head->flgs == 1)
+		return(1);
 //	free_all();
 	return (0);
 }

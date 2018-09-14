@@ -107,6 +107,13 @@ void		rm_cont(t_cont *current)
 		current->next->last = current->last;
 }
 
+void		set_error(t_opndir *head)
+{
+	while(head->last != NULL)
+		head = head->last;
+	head->flgs = 1;
+}
+
 void		build_directory_chain(t_opndir *head, int flags)
 {
 	t_cont		*temp;
@@ -124,7 +131,6 @@ void		build_directory_chain(t_opndir *head, int flags)
 	//print_full_chain(head);
 	while (temp != NULL)
 	{
-			lstat(temp->path, &temp->buffer);
 			if (S_ISDIR(temp->buffer.st_mode))// && 
 			//not_hidden_dir(head, temp, flags))
 			{
