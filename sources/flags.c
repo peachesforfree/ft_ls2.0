@@ -12,6 +12,12 @@
 
 #include "../includes/ft_ls.h"
 
+int		error_no_option(char c)
+{
+	ft_printf("ft_ls: %c: Does not exist\n", c);
+	return (-1);
+}
+
 int			bit_stuff(char c)
 {
 	int		result;
@@ -25,28 +31,26 @@ int			bit_stuff(char c)
 	return (result);
 }
 
-int			flag_checker(char **argv)
+int			flag_checker(char **argv, int *i)
 {
 	int		result;
-	int		y;
 	int		x;
 
 	result = 0;
-	y = 0;
-	while (argv[++y] != NULL)
+	while (argv[++*i] != NULL)
 	{
 		x = 0;
-		if (argv[y][0] == '-')
+		if (argv[*i][0] == '-')
 		{
 			x++;
-			while (argv[y][x] != '\0' && ft_strchr(FLAGCHAR, argv[y][x]))
+			while (argv[*i][x] != '\0' && ft_strchr(FLAGCHAR, argv[*i][x]))
 			{
-				result |= bit_stuff(argv[y][x]);
+				result |= bit_stuff(argv[*i][x]);
 				x++;
 			}
-			if (argv[y][x] != '\0' && (argv[y][0] == '-') &&
-			(ft_strchr(FLAGCHAR, argv[y][x]) == NULL))
-				return(error_no_option(argv[y][x]));
+			if (argv[*i][x] != '\0' && (argv[*i][0] == '-') &&
+			(ft_strchr(FLAGCHAR, argv[*i][x]) == NULL))
+				return(error_no_option(argv[*i][x]));
 		}
 		else
 			return (result);

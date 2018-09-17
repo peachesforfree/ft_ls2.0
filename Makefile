@@ -1,14 +1,14 @@
 NAME = ft_ls
 CFLAGS = -Wall -Wextra -Werror -g
-SRCS =	alpha_sort \
+SRCS =	main \
 		flags \
-		linked_list_func \
-		main \
-		new_item \
-		print_files \
-		print_long \
-		start_queue \
-		time_sort
+		#alpha_sort \
+		#linked_list_func \
+		#new_item \
+		#print_files \
+		#print_long \
+		#start_queue \
+		#time_sort
 
 SRC_DIR = sources/
 OBJ_DIR = obj/

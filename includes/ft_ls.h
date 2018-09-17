@@ -65,31 +65,31 @@ typedef struct		s_opndir
 	int				flgs;
 }					t_opndir;
 
-void				populate_dir(t_opndir *current, int flags);
-char				*new_path(char *prev, char *curr);
-int					not_hidden_dir(t_opndir *head, t_cont *current, int flags);
-int					directory_permission_check(t_opndir *current);
-int					flag_checker(char **argv);
-int					error_no_option(char c);
-t_cont				*new_cont(char *path, t_cont *before, t_cont *after);
-t_cont				*add_cont(char *path, t_cont *head, int flags);
-t_opndir			*new_dir(char *path);
-void				stack_opndir(t_opndir *current, t_opndir *new);
-void				enqueue_dir(t_opndir *head, t_opndir *new);
-char				*new_path(char *prev, char *curr);
-t_cont				*insert_time(char *path, t_cont *head);
-t_cont				*insert_alpha(char *path, t_cont *head);
-void				long_format_print(t_cont *current, t_format *format);
-int					print_blocks(t_opndir *head, int flags);
-t_cont				*iterate_t_cont(t_cont *temp, int flags);
-void				print_dir_cont(t_opndir *current, int flags);
-int					multiple_dir(t_opndir *head);
-void				run_stat_contents(t_cont *head);
-void				build_directory_chain(t_opndir *head, int flags);
-t_opndir			*start_queue(int flags, char **argv, int argc);
-void				populate_dir(t_opndir *current, int flags);
-int					directory_permission_check(t_opndir *current);
-void				remove_directories(t_opndir *head);
+// void				populate_dir(t_opndir *current, int flags);
+// char				*new_path(char *prev, char *curr);
+// int					not_hidden_dir(t_opndir *head, t_cont *current, int flags);
+// int					directory_permission_check(t_opndir *current);
+int					flag_checker(char **argv, int *i);
+// int					error_no_option(char c);
+// t_cont				*new_cont(char *path, t_cont *before, t_cont *after);
+// t_cont				*add_cont(char *path, t_cont *head, int flags);
+// t_opndir			*new_dir(char *path);
+// void				stack_opndir(t_opndir *current, t_opndir *new);
+// void				enqueue_dir(t_opndir *head, t_opndir *new);
+// char				*new_path(char *prev, char *curr);
+// t_cont				*insert_time(char *path, t_cont *head);
+// t_cont				*insert_alpha(char *path, t_cont *head);
+// void				long_format_print(t_cont *current, t_format *format);
+// int					print_blocks(t_opndir *head, int flags);
+// t_cont				*iterate_t_cont(t_cont *temp, int flags);
+// void				print_dir_cont(t_opndir *current, int flags);
+// int					multiple_dir(t_opndir *head);
+// void				run_stat_contents(t_cont *head);
+// void				build_directory_chain(t_opndir *head, int flags);
+// t_opndir			*start_queue(int flags, char **argv, int argc);
+// void				populate_dir(t_opndir *current, int flags);
+// int					directory_permission_check(t_opndir *current);
+// void				remove_directories(t_opndir *head);
 
 
 
