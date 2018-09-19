@@ -101,17 +101,18 @@ char		*format_name_str(int len, char *str)
 	return (ret);
 }
 
-void		long_format_print(t_cont *current, t_format *format)
+void		long_format_print(char *str, struct stat *buffer, int flags)
 {
-	lstat(current->path, &current->buffer);
-	leading_bit(&current->buffer);
-	ft_putchar((S_IRUSR & current->buffer.st_mode) ? 'r' : '-');
-	ft_putchar((S_IWUSR & current->buffer.st_mode) ? 'w' : '-');
-	ft_putchar((S_IXUSR & current->buffer.st_mode) ? 'x' : '-');
-	ft_putchar((S_IRGRP & current->buffer.st_mode) ? 'r' : '-');
-	ft_putchar((S_IWGRP & current->buffer.st_mode) ? 'w' : '-');
-	ft_putchar((S_IXGRP & current->buffer.st_mode) ? 'x' : '-');
-	last_bit(&current->buffer);
+	leading_bit(buffer);
+	ft_putchar((S_IRUSR & buffer->st_mode) ? 'r' : '-');
+	ft_putchar((S_IWUSR & buffer->st_mode) ? 'w' : '-');
+	ft_putchar((S_IXUSR & buffer->st_mode) ? 'x' : '-');
+	ft_putchar((S_IRGRP & buffer->st_mode) ? 'r' : '-');
+	ft_putchar((S_IWGRP & buffer->st_mode) ? 'w' : '-');
+	ft_putchar((S_IXGRP & buffer->st_mode) ? 'x' : '-');
+	last_bit(buffer);
+
+	//first find a way to keep format statistics
 	ft_printf(format_ls_str(format->digit_count_hard,"d "), current->buffer.st_nlink);
 	ft_printf(format_name_str(format->len_owner, "s  "), getpwuid(current->buffer.st_uid)->pw_name);
 	ft_printf(format_name_str(format->len_group, "s"), getgrgid(current->buffer.st_gid)->gr_name);
