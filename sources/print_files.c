@@ -52,17 +52,29 @@ void		cont(t_cont *temp, int flags, t_opndir *master)
 		ft_putchar('\n');
 }
 
+int			magic(int spell)
+{
+	int i;
+
+	i = 1;
+	while(spell >= 10)
+	{
+		spell /= 10;
+		i++;
+	}
+	return (i);
+}
+
 void		get_format_stats(t_opndir *master)
 {
 	t_cont		*temp;
-	int			i;
 	struct stat	buffer;
 	int			len;
 
 	if (master->format == NULL)
 		master->format = (t_format*)ft_memalloc(sizeof(t_format));
 	temp = master->dir_cont;
-	while (temp && !lstat(temp->path, &buffer) )
+	while (temp && !lstat(temp->path, &buffer))
 	{
 		if (master->format->digit_count_hard < buffer.st_nlink)
 			master->format->digit_count_hard = buffer.st_nlink;
@@ -76,30 +88,21 @@ void		get_format_stats(t_opndir *master)
 			master->format->len_group = len;
 		temp = temp->next;
 	}
-	i = 1;
-	while(master->format->digit_count_hard >= 10)
-	{
-		master->format->digit_count_hard /= 10;
-		i++;
-	}
-	master->format->digit_count_hard = i;
-	i = 1;
-	while (master->format->digit_count_size >= 10)
-	{
-		master->format->digit_count_size /= 10;
-		i++;
-	}
-	master->format->digit_count_size = i;
+	master->format->digit_count_hard = magic(master->format->digit_count_hard);
+	master->format->digit_count_size = magic(master->format->digit_count_size);
 }
 
 int			new_line(t_opndir *master)
 {
-	if (master->last != NULL && master->last->path == NULL && master->last->dir_cont != NULL)
+	if (master->last != NULL && master->last->path == NULL &&
+	master->last->dir_cont != NULL)
 		ft_printf("\n");
 	else if (master->last != NULL && master->last->path != NULL)
 	 	ft_printf("\n");
 
-	if(master->next == NULL && master->last != NULL && master->last->path == NULL && master->last->dir_cont == NULL && master->last->flgs != 1)
+	if(master->next == NULL && master->last != NULL &&
+	master->last->path == NULL && master->last->dir_cont == NULL
+	&& master->last->flgs != 1)
 		return (0);
 	return (1);
 }
@@ -110,17 +113,6 @@ void		print_dir_cont(t_opndir *current, int flags)
 
 	get_format_stats(current);
 	temp = current->dir_cont;
-
-	t_cont *derp = current->dir_cont;
-	if (derp)
-	{
-		while(derp->last != NULL)
-			derp = derp->last;
-		while (derp != NULL)
-		{
-			derp = derp->next;
-		}
-	}
 	if (current->last != NULL && new_line(current))
 		ft_printf("%s:\n", current->path);
 	if (directory_permission_check(current))
