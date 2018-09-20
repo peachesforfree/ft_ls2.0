@@ -46,7 +46,6 @@ int			not_hidden_dir(t_opndir *head, t_cont *current, int flags)
 	char	*file;
 	int		len;
 
-	//dprintf(2, "head->path:%s\tcurrent->path:%s\n",head->path, current->path);
 	if (head->path == NULL)
 		return (1);
 	file = ft_strstr(current->path, head->path);
@@ -68,12 +67,6 @@ int			main(int argc, char **argv)
 {
 	int			flags;
 	t_opndir	*head;
-//	t_opndir	*temp;8
-
-	// int i;
-	// for (i = 0; i < argc; i = i + 1)
-	// 	dprintf(2, "\tUSER IN:%s\n", argv[i]);
-
 	
 	flags = flag_checker(argv);
 	if (flags < 0)
@@ -82,10 +75,9 @@ int			main(int argc, char **argv)
 	while (head != NULL)
 	{
 		print_dir_cont(head, flags);
-		if ((flags & RECFLG))
+		if ((flags & RECFLG) && (head->path != NULL && (ft_strstr(head->path, "./") == NULL)))
 			build_directory_chain(head, flags);
 		head = head->next;
 	}
-//	free_all();
 	return (0);
 }

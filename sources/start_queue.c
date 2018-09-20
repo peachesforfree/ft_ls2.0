@@ -43,18 +43,13 @@ void		remove_directories(t_opndir *head)
 int			directory_permission_check(t_opndir *current)
 {
 	DIR			*dirent;
-	//struct stat	buffer;
 
 	if (current->path == NULL)
 		return (0);
-	// if ((lstat(current->path, &buffer) >= 0) && (buffer.st_mode | S_IROTH))
-	// 	return (0);
 	errno = 0;
 	dirent = opendir(current->path);
 	if (errno != 0)
 	{
-	//	ft_printf("\n%s:\nft_ls: %s: %s\n", current->path,
-	//	current->path, strerror(errno));
 		return (1);
 	}
 	closedir(dirent);
@@ -67,7 +62,6 @@ int			does_exist(char *str)
 
 	if (lstat(str, &buffer) < 0)
 	{
-		//ft_printf("ft_ls: %s: No such file or directory\n", str);	
 		ft_printf("ls: %s: No such file or directory\n", str);
 		return (0);
 	}
@@ -94,21 +88,6 @@ void		populate_dir(t_opndir *current, int flags)
 	closedir(current->dir);
 }
 
-// void		print_cont_list(t_cont *head)
-// {
-// 	while (head)
-// 	{
-// 		dprintf(2,"ENTERED:%s\n", head->path);
-// 		head = head->next;
-// 	}
-// 															//remove when done
-// }
-
-/*
-**To assemble first queue. Either assembles the list of stated items
-** OR makes current directory the only item in head list
-*/
-
 void		print_full_chain(t_opndir *head)
 {
 	t_opndir	*temp;
@@ -128,18 +107,24 @@ void		print_full_chain(t_opndir *head)
 	}
 }
 
+int			set_y(char **argv)
+{
+	int y;
+
+	y = 1;
+	while (argv[y] != NULL && argv[y][0] == '-' && argv[y][1] != '\0')
+		y++;
+	return (y);
+}
+
 t_opndir	*start_queue(int flags, char **argv, int argc)
 {
 	t_opndir	*result;
 	int			y;
-	(void) argc;
 
-	y = 1;
+	y = set_y(argv);
 	result = (t_opndir*)ft_memalloc(sizeof(t_opndir));
-	while (argv[y] != NULL && argv[y][0] == '-' && argv[y][1] != '\0')
-		y++;
-	//checking if there are no arguments. 
-	if (y == argc)// || ((y + 1 == argc) && (ft_strlen(argv[y]) == 1) && (argv[y][0] == '.')))
+	if (y == argc)
 	{
 		result->path = ft_strdup(".");
 		populate_dir(result, flags);
@@ -149,17 +134,13 @@ t_opndir	*start_queue(int flags, char **argv, int argc)
 		while (argv[y] != NULL)
 		{
 			if (does_exist(argv[y]))
-			{
 				result->dir_cont = add_cont(argv[y], result->dir_cont, flags);
-			}
 			else
 				result->flgs = 1;
 			y++;
 		}
-
 		build_directory_chain(result, flags);
 	}
-	//run_stat_contents(result->dir_cont);
 	remove_directories(result);
 	return (result);
 }

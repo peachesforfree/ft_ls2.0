@@ -43,14 +43,10 @@ char		*format_ls_str(int number, char *c)
 	char	*ret;
 	char	*ret_number;
 
-	//dprintf(2, "NUMBERS:%d\n", number);
 	ret_number = ft_itoa(number + 1);
 
 	ret = ft_strjoin(" % ", ret_number);
 	ret = ft_strjoin(ret, c);
-	//"% 3d"
-	//"% 5lld "
-	//dprintf(2,"\t\t\tFORMAT:%s\n", ret);
 	return (ret);
 }
 
@@ -115,7 +111,6 @@ void		long_format_print(t_cont *current, t_format *format)
 	ft_printf(format_ls_str(format->digit_count_hard,"d "), current->buffer.st_nlink);
 	ft_printf(format_name_str(format->len_owner, "s  "), getpwuid(current->buffer.st_uid)->pw_name);
 	ft_printf(format_name_str(format->len_group, "s"), getgrgid(current->buffer.st_gid)->gr_name);
-	//dprintf(2, "\n\tFILE:%s\tSIZE:%lld\tDigits:%d\n", current->path,current->buffer.st_size, format->digit_count_size);
 	ft_printf(format_ls_str(format->digit_count_size,"d "), current->buffer.st_size);
 	continued(current);
 	ft_putchar(' ');

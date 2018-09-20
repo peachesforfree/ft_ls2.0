@@ -64,7 +64,6 @@ void		stack_opndir(t_opndir *current, t_opndir *new)
 		temp->last = new;
 		new->next = temp;
 	}
-	//remove_cont(current, new->path);
 }
 
 void		enqueue_dir(t_opndir *head, t_opndir *new)

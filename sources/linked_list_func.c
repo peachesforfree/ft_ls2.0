@@ -23,16 +23,9 @@ int			multiple_dir(t_opndir *head)
 {
 	
 	if (head->next != NULL)
-	{
-		//dprintf(2, "MULTDIR:head->path:%s\thead->next:%p\thead->last:%p\t RET;1\n", head->path, head->next, head->last);
 		return (1);
-	}
-	if (head->last != NULL) //&& head->last->path != NULL)
-	{
-		//dprintf(2, "MULTDIR:head->path:%s\thead->next:%p\thead->last:%p\t ret:1\n", head->path, head->next, head->last);
-			return (1);
-	}
-	//dprintf(2, "MULTDIR:head->path:%s\thead->next:%p\thead->last:%p\tret:0\n", head->path, head->next, head->last);
+	if (head->last != NULL)
+		return (1);
 	return (0);
 }
 
@@ -57,7 +50,6 @@ void remove_cont(t_opndir *head, char *path)
 	{
 		if (!ft_strcmp(current->path, path))
 			break;
-			//dprintf(2,"PATH GIVEN:%s\tNMEED:%s\n", temp->path, path);
 		current = current->next;
 	}
 	if (current == NULL)
@@ -65,34 +57,25 @@ void remove_cont(t_opndir *head, char *path)
 	temp = head->dir_cont;
 	while (temp != NULL)
 	{
-		//if selected is in front
 		if (temp == current && temp->last == NULL)
 		{
-			//dprintf(2,"FRONT\tTEMP:%p\tCURRENT:%p\n", temp, current);
 			head->dir_cont = current->next;
-			//free(current);
 			if (current->next != NULL)
 				current->next->last = NULL;
 			return;
 		}
-		//if selected is in middle
 		if (temp == current && temp->next != NULL)
 		{
-			//dprintf(2,"MIDDLE\tTEMP:%p\tCURRENT:%p\n", temp, current);
 			if (current->last != NULL)
 				current->last->next = current->next;
 			if (current->next != NULL)
 				current->next->last = current->last;
-			//free(current);
 			return;
 		}
-		//if selected i at end
 		if (temp == current && temp->next == NULL)
 		{
-			//dprintf(2,"END\tTEMP:%p\tCURRENT:%p\n", temp, current);
 			if (current->last != NULL)
 				current->last->next = NULL;
-			//free(current);
 			return ;
 		}		
 		temp = temp->next;
@@ -121,18 +104,15 @@ void		build_directory_chain(t_opndir *head, int flags)
 	{
 		temp = go_to_end(current->dir_cont);
 	}
-	//print_full_chain(head);
 	while (temp != NULL)
 	{
 			lstat(temp->path, &temp->buffer);
-			if (S_ISDIR(temp->buffer.st_mode))// && 
-			//not_hidden_dir(head, temp, flags))
+			if (S_ISDIR(temp->buffer.st_mode))
 			{
 				dir_temp = new_dir(temp->path);
 				stack_opndir(current, dir_temp);
 				populate_dir(dir_temp, flags);
 				rm_cont(temp);
-				//remove_cont(head, temp->path);
 			}
 		temp = iterate(temp, flags);
 	}
