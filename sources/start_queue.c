@@ -12,50 +12,6 @@
 
 #include "../includes/ft_ls.h"
 
-void		remove_directories(t_opndir *head)
-{
-	t_cont	*current;
-	t_cont	*before;
-	t_cont	*after;
-
-	current = head->dir_cont;
-	while (current != NULL && S_ISDIR(current->buffer.st_mode))
-	{
-		if (S_ISDIR(current->buffer.st_mode))
-		{
-			before = current->last;
-			after = current->next;
-			if (before != NULL)
-				before->next = after;
-			if (after != NULL)
-				after->last = before;
-		}
-		if (before != NULL)
-			head->dir_cont = before;
-		else if (before == NULL && after != NULL)
-			head->dir_cont = after;
-		else if (before == NULL && after == NULL)
-			head->dir_cont = NULL;
-		current = after;
-	}
-}
-
-int			directory_permission_check(t_opndir *current)
-{
-	DIR			*dirent;
-
-	if (current->path == NULL)
-		return (0);
-	errno = 0;
-	dirent = opendir(current->path);
-	if (errno != 0)
-	{
-		return (1);
-	}
-	closedir(dirent);
-	return (0);
-}
-
 int			does_exist(char *str)
 {
 	struct stat		buffer;
@@ -72,14 +28,14 @@ void		populate_dir(t_opndir *current, int flags)
 {
 	char	*new;
 
-	if (current == NULL)
+	if (current == NULL || (ft_strstr(current->path, "/.") != NULL || ft_strstr(current->path, "/..") != NULL))
 		return ;
 	current->dir = opendir(current->path);
 	if (current->dir == NULL)
 		return ;
 	while ((current->dirent = readdir(current->dir)) != NULL)
 	{
-		if (!(flags & HIDFLG) && (current->dirent->d_name[0] == '.'))
+		if ((flags | HIDFLG) == HIDFLG && (current->dirent->d_name[0] == '.'))
 			continue;
 		new = new_path(current->path, current->dirent->d_name);
 		if (new != NULL)

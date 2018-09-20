@@ -3,11 +3,14 @@ CFLAGS = -Wall -Wextra -Werror -g
 SRCS =	alpha_sort \
 		flags \
 		linked_list_func \
+		linked_list_func1 \
 		main \
 		new_item \
 		print_files \
+		print_files1 \
 		print_long \
 		start_queue \
+		start_queue1 \
 		time_sort
 
 SRC_DIR = sources/

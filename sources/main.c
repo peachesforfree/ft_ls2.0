@@ -32,25 +32,19 @@ int			error_no_option(char c)
 	return (-1);
 }
 
-int			not_hidden_dir(t_opndir *head, t_cont *current, int flags)
+int			is_directory(char *path)
 {
-	char	*file;
-	int		len;
+	struct stat		buffer;
 
-	if (head->path == NULL)
-		return (1);
-	file = ft_strstr(current->path, head->path);
-	if (file != NULL)
-		file = &file[ft_strlen(head->path) + 1];
-	len = ft_strlen(file);
-	if (len == 1 && file[0] == '.')
+	if (lstat(path, &buffer) != 0)
 		return (0);
-	if (len == 2 && file[0] == '.' && (file[1] == '.' || file[1] == '/'))
-		return (0);
-	if (len == 3 && file[0] == '.' && file[1] == '.' && file[2] == '/' )
-		return (0);
-	if (len >= 1 && file[0] == '.' && !(flags & HIDFLG))
-		return (0);
+	if (S_ISDIR(buffer.st_mode))
+	{
+		if (ft_strstr(path, "/.") != NULL)
+			return (0);
+		if (ft_strstr(path, "/..") != NULL)
+			return (0);
+	}
 	return (1);
 }
 
@@ -66,7 +60,7 @@ int			main(int argc, char **argv)
 	while (head != NULL)
 	{
 		print_dir_cont(head, flags);
-		if ((flags & RECFLG) && (head->path != NULL && (ft_strstr(head->path, "./") == NULL)))
+		if ((flags & RECFLG) && head->path != NULL && is_directory(head->path))
 			build_directory_chain(head, flags);
 		head = head->next;
 	}

@@ -67,7 +67,6 @@ typedef struct		s_opndir
 
 void				populate_dir(t_opndir *current, int flags);
 char				*new_path(char *prev, char *curr);
-int					not_hidden_dir(t_opndir *head, t_cont *current, int flags);
 int					directory_permission_check(t_opndir *current);
 int					flag_checker(char **argv);
 int					error_no_option(char c);
@@ -90,6 +89,16 @@ t_opndir			*start_queue(int flags, char **argv, int argc);
 void				populate_dir(t_opndir *current, int flags);
 int					directory_permission_check(t_opndir *current);
 void				remove_directories(t_opndir *head);
+t_cont				*go_to_end(t_cont *temp);
+int					multiple_dir(t_opndir *head);
+t_cont				*iterate(t_cont *current, int flags);
+t_cont      		*sex_and_magic(t_opndir *head, t_cont *current, char *path);
+void				remove_directories(t_opndir *head);
+int					directory_permission_check(t_opndir *current);
+t_cont				*iterate_t_cont(t_cont *temp, int flags);
+void				link_name(t_cont *temp);
+
+
 
 
 
