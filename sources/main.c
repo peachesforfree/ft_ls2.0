@@ -22,8 +22,10 @@
 
 #include "../includes/ft_ls.h"
 
-t_list	*open_directory(char *directory, int flags);
-int		directory_file_read(t_list *head, int flags);
+t_list	*open_directory(char *directory, int *flags);
+int		directory_file_read(t_list *head, int *flags);
+int		is_directory(char *path);
+
 
 /*
  * bridges front to current and current to last
@@ -111,16 +113,16 @@ t_list	*append(t_list *head, void *elem, int size, int(*sort)(char*,char*))
  *This will choose the sorting algorithm to be applied
  * by assesing the flags
 */
-t_list	*sorted_list(char *str, int flags, t_list *head)
+t_list	*sorted_list(char *str, int *flags, t_list *head)
 {
-	if (flags | REVFLG)
+	if (*flags | REVFLG)
 		head = append(head, str, ft_strlen(str), &insert_alpha);			//insert alpha
 	else
 		head = append(head, str, ft_strlen(str), &insert_time);			//insert time
 	return (head);
 }
 
-t_list	*start_list(int argc, char **argv, int i, int flags)
+t_list	*start_list(int argc, char **argv, int i, int *flags)
 {
 	t_list	*head;
 
@@ -270,7 +272,7 @@ char	*ft_strrnchr(char *str, char c, int count)
  *		prints file name and if its a symbnolic link, prints the link info
 */
 
-void	printer_scheme(char *str, struct stat *buffer, int flags, int *format)
+void	printer_scheme(char *str, struct stat *buffer, int *flags, int *format)
 {
 	char	*file_name;
 	
@@ -279,7 +281,7 @@ void	printer_scheme(char *str, struct stat *buffer, int flags, int *format)
 		file_name = str;
 	// if (file_name == NULL || file_name[0] == '\0')
 	// 	file_name = str;
-	if ((flags & LONGFLG) == LONGFLG)
+	if ((*flags & LONGFLG) == LONGFLG)
 	{
 		print_file_permissions(buffer);
 		print_number_of_links(format, buffer);
@@ -295,14 +297,14 @@ void	printer_scheme(char *str, struct stat *buffer, int flags, int *format)
 	ft_putchar('\n');
 }
 
-void	get_format_stats(t_list *head, int flags, int *format)
+void	get_format_stats(t_list *head, int *flags, int *format)
 {
 	struct stat buffer;
 	int			temp;
 
 	(void)flags;
 
-	ft_bzero(format, sizeof(int) * 5);
+	ft_bzero(format, sizeof(int) * 6);
 	while (head != NULL)
 	{
 		if (lstat(head->content, &buffer) == 0)
@@ -334,11 +336,11 @@ void	get_format_stats(t_list *head, int flags, int *format)
  * 
 */
 
-int	run_lstat(t_list *head, int flags)
+int	run_lstat(t_list *head, int *flags)
 {
 	struct stat	buffer;
 	t_list		*temp;
-	int			format[5];
+	int			format[6];
 	int			ret;
 
 	if (head == NULL)
@@ -346,7 +348,7 @@ int	run_lstat(t_list *head, int flags)
 	temp = head;
 	ret = 0;
 	get_format_stats(head, flags, format);
-	if ((flags | LONGFLG) && !((flags & NODIR) == NODIR))
+	if ((*flags & LONGFLG) == LONGFLG)// && !((*flags & NODIR) == NODIR))
 		ft_printf("total %d\n", format[4]);
 	//file printing
 	while(temp != NULL)
@@ -358,29 +360,32 @@ int	run_lstat(t_list *head, int flags)
 				// if (ft_strrchr(temp->content, '/'))
 				// 	printer_scheme(temp->content, &buffer, flags, format);
 				// else
-			if (S_ISDIR(buffer.st_mode) && ((flags & NODIR) == NODIR))
+			if (S_ISDIR(buffer.st_mode) && ((*flags & NODIR) == NODIR))
 			{
 				temp = temp->next;
+				format[5] = 1;
 				continue;
 			}
-					printer_scheme(temp->content, &buffer, flags, format);
+				printer_scheme(temp->content, &buffer, flags, format);
+			//if (temp->next != NULL)
+				
 			//}
 		}
 		else
 		{
-			ft_printf("ft_ls: %s: No such file or directory\n", temp->content);
+			ft_printf("ls: %s: No such file or directory\n", temp->content);
 			ret = 1;
 		}
 		temp = temp->next;
 	}
 	temp = head;
-	while ((flags & RECFLG) == RECFLG && temp != NULL && (lstat(temp->content, &buffer) == 0))
+	while ((*flags & RECFLG) == RECFLG && temp != NULL && (lstat(temp->content, &buffer) == 0))
 	{
 		if (S_ISDIR(buffer.st_mode))
 		{
 			if (ft_strstr(temp->content, "/.") == NULL &&  ft_strstr(temp->content, "/..") == NULL)
 		 	{
-			 	open_directory(temp->content, flags);
+				ret = run_lstat(open_directory(temp->content, flags), flags);
 			}
 		}
 		temp = temp->next;
@@ -388,35 +393,38 @@ int	run_lstat(t_list *head, int flags)
 	return (ret);
 }
 
-int		directory_file_read(t_list *head, int flags)
-{
-	struct stat buffer;
-	t_list		*temp;
-	t_list		*new;
+// int		directory_file_read(t_list *head, int *flags)
+// {
+// 	struct stat buffer;
+// 	t_list		*temp;
+// 	t_list		*new;
 
-	temp = head;
-	while (temp != NULL && (lstat(temp->content, &buffer) == 0))
-	{
-		if (S_ISDIR(buffer.st_mode))
-		{
-			if (ft_strstr(temp->content, "/.") == NULL && ft_strstr(temp->content, "/..") == NULL)
-		 	{
-				new = open_directory(temp->content, flags);
-				//if (not_solo_directory())
-				//	ft_printf("%s:\n", directory);
-				if ((flags & RECFLG) == RECFLG)
-				{
-					run_lstat(new, flags);
-					directory_file_read(new, flags);
-				}
-			}
-		}
-		temp = temp->next;
-	}
-	return (0);
-}
+// 	temp = head;
+// 	while (temp != NULL && (lstat(temp->content, &buffer) == 0))
+// 	{
+// 		if (S_ISDIR(buffer.st_mode))
+// 		{
+// 			if (ft_strstr(temp->content, "/.") == NULL && ft_strstr(temp->content, "/..") == NULL)
+// 		 	{
+// 				//if ((flags & PRINTDIR) != PRINTDIR)
+// //				ft_printf("%s:\n", temp->content);
+			
+// 				new = open_directory(temp->content, flags);
+// 				//if (not_solo_directory())
+// 				//	ft_printf("%s:\n", directory);
+// 				if ((*flags & RECFLG) == RECFLG)
+// 				{
+// 					run_lstat(new, flags);
+// 					directory_file_read(new, flags);
+// 				}
+// 			}
+// 		}
+// 		temp = temp->next;
+// 	}
+// 	return (0);
+// }
 
-t_list		*open_directory(char *directory, int flags)
+t_list		*open_directory(char *directory, int *flags)
 {
 	DIR				*dir_fd;
 	struct dirent	*buffer;
@@ -425,11 +433,22 @@ t_list		*open_directory(char *directory, int flags)
 
 	contents_list = NULL;
 	dir_fd = opendir(directory);
+	// if ((*flags & PRINTDIR) != PRINTDIR)
+	// {
+	// 	if ((*flags & LONGFLG) || (*flags & RECFLG))
+	if ((*flags & PRINTDIR) == PRINTDIR) //&& is_directory(directory))
+		ft_printf("\n%s:\n", directory);
+	// }
+	// else
+	// 	*flags -= PRINTDIR;
 	if (dir_fd == NULL)
+	{
+		ft_printf("ls: %s: Permission Denied\n", directory);
 		return (NULL);	//find a way to handle this error
+	}
 	while((buffer = readdir(dir_fd)) != NULL)
 	{
-		if ((flags & HIDFLG) != HIDFLG && buffer->d_name[0] == '.')
+		if ((*flags & HIDFLG) != HIDFLG && buffer->d_name[0] == '.')
 			continue;
 		temp = ft_strjoin(directory, "/");
 		temp = ft_strnjoin(temp, buffer->d_name, 1);
@@ -440,6 +459,24 @@ t_list		*open_directory(char *directory, int flags)
 	return (contents_list);
 }
 
+int		is_directory(char *path)
+{
+	struct stat	buffer;
+
+	if (lstat(path, &buffer) == 0 && S_ISDIR(buffer.st_mode))
+		return (1);
+	return (0);
+}
+
+t_list	*home_dir(int *flags)
+{
+	t_list *ret;
+
+	*flags += PRINTDIR;
+	ret = open_directory(".", flags);
+	*flags -= PRINTDIR;
+	return (ret);
+}
 
 int main(int argc, char **argv)
 {
@@ -455,24 +492,33 @@ int main(int argc, char **argv)
 	if (flags < 0)
 		return (1);
 //	head = sorted_list(argc, argv, i, flags);
+	flags |= PRINTDIR;
 	if (i < argc)
 	{
-		ret = run_lstat(start_list(argc, argv, i, flags), flags + NODIR);
+		t_list *temp;
+
+		temp = start_list(argc, argv, i, &flags);
+		flags |= NODIR;
+		ret = run_lstat(temp, &flags);
+		flags -= NODIR;
 		//ret = directory_file_read(start_list(argc, argv, i, flags), flags);
+		flags += PRINTDIR;
 		while (i < argc)
 		{
-			//if ((i + 1) == argc)
-			//	flags += NODIR;
-			ret = run_lstat(open_directory(argv[i], flags), flags + FIRSTDIR);
+			if (is_directory(argv[i]))
+			{
+				ret = run_lstat(open_directory(argv[i], &flags), &flags);
+				flags -= (flags | PRINTDIR);
+			}
 			i++;
-			if (i != argc)
-				ft_putchar('\n');
+			//if (i != argc)
+			//	ft_putchar('\n');
 
 		}
 	}
 	else
 	{
-		ret = run_lstat(open_directory(".", flags), flags + FIRSTDIR);
+		ret = run_lstat(home_dir(&flags), &flags);
 		//ret = run_lstat(ft_lstnew(".", 2), flags);
 		//ret = directory_file_read(ft_lstnew(".", 2), flags);
 		//ret = run_lstat(start_list(argc, argv, i, flags), flags);

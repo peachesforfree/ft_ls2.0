@@ -36,7 +36,7 @@
 # define TIMFLG     0b00010000
 # define DIRCNT		0b00100000
 # define NODIR		0b10000000
-# define FIRSTDIR	0b01000000
+# define PRINTDIR	0b01000000
 # define NOOPTION   1
 
 typedef struct		s_format
