@@ -41,10 +41,11 @@ int			time_check(t_cont *current, t_cont *temp)
 	return (0);
 }
 
-void		bridge(t_cont *temp, t_cont *current)
+t_cont		*bridge(t_cont *temp, t_cont *current, t_cont *head)
 {
 	temp->last = current;
 	current->next = temp;
+	return (head);
 }
 
 t_cont		*insert_time(char *path, t_cont *head)
@@ -67,10 +68,7 @@ t_cont		*insert_time(char *path, t_cont *head)
 				return (holder);
 		}
 		if (current->next == NULL)
-		{
-			bridge(temp, current);
-			return (head);
-		}
+			return (bridge(temp, current, head));
 		current = current->next;
 	}
 	return (head);
