@@ -10,15 +10,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-/*
-	problem with printing results
-
-	need to look into the stat buffer in void		get_format_stats(t_opndir *master) in print_files.c
-	wrong value from struct is being used and need to find the right one.
-	its screwing up values in the moulitest
-
-*/
-
 #include "../includes/ft_ls.h"
 
 char		*new_path(char *prev, char *curr)

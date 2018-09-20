@@ -37,47 +37,58 @@ t_cont		*iterate(t_cont *current, int flags)
 		return (current->last);
 }
 
+t_cont	*sex_and_magic(t_opndir *head, t_cont *current, char *path)
+{
+	if (head->path != NULL || !head || !path)
+		return (NULL);
+	while (current)
+	{
+		if (!ft_strcmp(current->path, path))
+			return (current);
+		current = current->next;
+	}
+	return (current);
+}
+
+int		majik(t_opndir *head, t_cont *temp, t_cont *current)
+{
+	if (temp == current && temp->last == NULL)
+	{
+		head->dir_cont = current->next;
+		if (current->next != NULL)
+			current->next->last = NULL;
+		return(1);
+	}
+	if (temp == current && temp->next != NULL)
+	{
+		if (current->last != NULL)
+			current->last->next = current->next;
+		if (current->next != NULL)
+			current->next->last = current->last;
+		return (1);
+	}
+	if (temp == current && temp->next == NULL)
+	{
+		if (current->last != NULL)
+			current->last->next = NULL;
+		return (1);
+	}
+	return (0);
+}
 
 void remove_cont(t_opndir *head, char *path)
 {
     t_cont	*temp;
 	t_cont	*current;
-	
-	if (head->path != NULL || !head || !path)
-		return;
-	current = head->dir_cont;
-	while (current)
-	{
-		if (!ft_strcmp(current->path, path))
-			break;
-		current = current->next;
-	}
+
+	current = sex_and_magic(head, head->dir_cont, path);
 	if (current == NULL)
 		return;
 	temp = head->dir_cont;
 	while (temp != NULL)
 	{
-		if (temp == current && temp->last == NULL)
-		{
-			head->dir_cont = current->next;
-			if (current->next != NULL)
-				current->next->last = NULL;
-			return;
-		}
-		if (temp == current && temp->next != NULL)
-		{
-			if (current->last != NULL)
-				current->last->next = current->next;
-			if (current->next != NULL)
-				current->next->last = current->last;
-			return;
-		}
-		if (temp == current && temp->next == NULL)
-		{
-			if (current->last != NULL)
-				current->last->next = NULL;
+		if (majik(head, temp, current))
 			return ;
-		}		
 		temp = temp->next;
 	}
 }
