@@ -40,10 +40,7 @@ int			flag_checker(char **argv)
 		{
 			x++;
 			while (argv[y][x] != '\0' && ft_strchr(FLAGCHAR, argv[y][x]))
-			{
-				result |= bit_stuff(argv[y][x]);
-				x++;
-			}
+				result |= bit_stuff(argv[y][x++]);
 			if (argv[y][x] != '\0' && (argv[y][0] == '-') &&
 			(ft_strchr(FLAGCHAR, argv[y][x]) == NULL))
 				return(error_no_option(argv[y][x]));
