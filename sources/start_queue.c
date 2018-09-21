@@ -35,7 +35,7 @@ void		populate_dir(t_opndir *current, int flags)
 		return ;
 	while ((current->dirent = readdir(current->dir)) != NULL)
 	{
-		if ((flags | HIDFLG) == HIDFLG && (current->dirent->d_name[0] == '.'))
+		if ((flags & HIDFLG) != HIDFLG && (current->dirent->d_name[0] == '.'))
 			continue;
 		new = new_path(current->path, current->dirent->d_name);
 		if (new != NULL)
@@ -82,7 +82,7 @@ t_opndir	*start_queue(int flags, char **argv, int argc)
 	result = (t_opndir*)ft_memalloc(sizeof(t_opndir));
 	if (y == argc)
 	{
-		result->path = ft_strdup(".");
+		result->path = ft_strdup("./");
 		populate_dir(result, flags);
 	}
 	else

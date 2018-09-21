@@ -30,7 +30,7 @@ char		*new_path(char *prev, char *curr)
 int			error_no_option(char c)
 {
 	ft_printf("ls: illegal option -- ");
-	ft_printf("%c\nusage: ls [%s] [file ...]\n", c, FLAGCHAR);
+	ft_printf("%c\nusage: ft_ls [%s] [file ...]\n", c, FLAGCHAR);
 	return (-1);
 }
 
@@ -52,6 +52,8 @@ int			is_special_dir(char *path)
 	char			*temp;
 	int				len;
 
+	if (path == NULL)
+		return (0);
 	if (path[0] == '/')
 		return (0);
 	if ((temp = ft_strstr(path, "/.")) != NULL)
@@ -66,7 +68,7 @@ int			is_special_dir(char *path)
 		return (1);
 	
 	temp = ft_strrchr(path, '/');
-	if (ft_strlen(temp) <= 3 && ft_strlen(path) > 2)
+	if (temp != NULL && ft_strlen(temp) <= 3 && ft_strlen(path) > 2)
 	{
 		if (ft_strstr(temp,"/.."))
 			return (1);
@@ -85,8 +87,8 @@ int			main(int argc, char **argv)
 	if (flags < 0)
 		return (1);
 	head = start_queue(flags, argv, argc);
-	print_dir_cont(head, flags);
-	head = head->next;
+	//print_dir_cont(head, flags);
+	//head = head->next;
 	while (head != NULL)
 	{
 		if (!is_special_dir(head->path))

@@ -6,7 +6,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceRoot}/ft_ls",
-            "args": ["-lR", "./libft/.git"],
+            "args": ["-R", "test"],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
             "environment": [],
