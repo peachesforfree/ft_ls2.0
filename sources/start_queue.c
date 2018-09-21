@@ -28,8 +28,8 @@ void		populate_dir(t_opndir *current, int flags)
 {
 	char	*new;
 
-	if (current == NULL || (ft_strstr(current->path, "/.") != NULL || ft_strstr(current->path, "/..") != NULL))
-		return ;
+	//if (current == NULL || (ft_strstr(current->path, "/.") != NULL || ft_strstr(current->path, "/..") != NULL))
+	//	return ;
 	current->dir = opendir(current->path);
 	if (current->dir == NULL)
 		return ;
