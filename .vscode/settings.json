@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "ft_ls.h": "c",
+        "libft.h": "c",
+        "errno.h": "c",
+        "ft_printf.h": "c"
+    }
+}
